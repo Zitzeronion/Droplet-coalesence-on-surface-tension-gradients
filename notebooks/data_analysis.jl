@@ -175,7 +175,7 @@ and will vary $b$.
 md"The above array contains the names of the finite set of surface tension fields we are using, the number behind the tanhX refers to parameter $b$ and therefore the smoothing width."
 
 # ╔═╡ 31982c37-8324-4b6e-9bbc-42b8594a90c9
-md"## Data display
+md"## Data
 
 Simulations for the above surface tension fields have been performed.
 Now most of this data may seem obscure to any other person but me, so let's take a moment to explain what it contains.
@@ -196,7 +196,69 @@ These dataframes we ask questions,
 4) Is this symmetric or skewed
 
 to name a few and dump every answer into another dataframe.
+The answers to these questions and a few more are stored in the **data** folder in a *.csv* file.
+If for whatever reson someone want to analyse the with *Excel* it would be possible, but it would make me feel physical pain (so please use well cultivated open source software).
 "
+
+# ╔═╡ 7bd5733d-ec1a-4fad-a32b-86b295fbb93f
+coalescene_data = CSV.read("..\\data\\coalescence_data_slip_12_gamma0_1e-5_hmin_012.csv", DataFrame)
+
+# ╔═╡ f9849f21-02db-4bc6-ac7c-c3470c4d9bf5
+md"## Data analysis
+
+With ``coalescence_data`` we have a list with many entries and lots of numbers.
+What we hope to do now is to make sense of some of these numbers.
+
+Most of these columns are somewhat meaningful, for example the skewness is are measure that can be used right away.
+Some columns however need a little perspective.
+One that is paticular is the time column, because these are lattice Boltzmann time steps.
+Therefore we are going to normalize them by the inertio-capillary time scale, 
+
+$\tau_{ic} = \sqrt{\frac{\rho r_0^3}{\gamma}},$
+
+where $\rho$ is the density (assumed to be one), $r_0$ is the droplets initial radius and $\gamma$ is the maxium of the surface tension field $\gamma(x)$.
+"
+
+# ╔═╡ 23623020-3992-499d-aba5-37488b92797f
+"""
+	tau_ic(;ρ=1, r₀=171, γ=γ₀)
+
+Computation of the inertio-capillary time.
+
+#### Mathematics
+
+`` \\tau_{\\text{ic}} = \\sqrt{\\frac{\\rho r_0^3}{\\gamma}} ``
+
+where ``r_0`` is the base radius of the droplet, ``\\rho`` is the liquids density and ``\\gamma`` is the surface tension.
+"""
+function tau_ic(;ρ=1, r₀=171, γ=1e-5)
+	return sqrt(ρ*r₀^3/γ)
+end
+
+# ╔═╡ d0c30d75-4e53-401b-82ef-b974d6ad170b
+md"Adding a column to the above dataframe is as simple as this:"
+
+# ╔═╡ 5053ff78-1a91-4912-9360-ab6e1dbcff61
+coalescene_data.t_norm .= coalescene_data.time ./ tau_ic() 
+
+# ╔═╡ fda64125-84cf-43cb-9fc9-40fff5144770
+md"Which brings us to the question we asked in the beginning, what is the growth rate of the liquid bridge?
+
+But first an intermezo into the world of having good data visualization.
+For the longest time I wanted to use something beyond Plots.GR backend.
+GR is fine and all but not what I would call flashy.
+Going flashier than GR is Makie.jl.
+But Makie.jl is also more work..."
+
+# ╔═╡ 0782890d-d779-4893-bf4d-de4cd2b1d597
+WGLMakie.activate!()
+
+# ╔═╡ 9a244630-d8db-4f7e-9916-f0b21904593e
+begin
+	# Set the default resolution to something that fits the Documenter theme
+	set_theme!(resolution=(800, 400))
+	scatter(1:4, color=1:4)
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1951,6 +2013,14 @@ version = "3.5.0+0"
 # ╟─88dc323f-f640-4bd8-9db8-7965785663e2
 # ╠═125d7e66-205c-406d-99da-a24ebd8b6a6d
 # ╟─1166c2dc-654d-4fc1-8697-8e135a288e05
-# ╠═31982c37-8324-4b6e-9bbc-42b8594a90c9
+# ╟─31982c37-8324-4b6e-9bbc-42b8594a90c9
+# ╠═7bd5733d-ec1a-4fad-a32b-86b295fbb93f
+# ╟─f9849f21-02db-4bc6-ac7c-c3470c4d9bf5
+# ╠═23623020-3992-499d-aba5-37488b92797f
+# ╟─d0c30d75-4e53-401b-82ef-b974d6ad170b
+# ╠═5053ff78-1a91-4912-9360-ab6e1dbcff61
+# ╟─fda64125-84cf-43cb-9fc9-40fff5144770
+# ╠═0782890d-d779-4893-bf4d-de4cd2b1d597
+# ╠═9a244630-d8db-4f7e-9916-f0b21904593e
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
