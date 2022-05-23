@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.4
+# v0.19.5
 
 using Markdown
 using InteractiveUtils
@@ -246,24 +246,50 @@ md"Which brings us to the question we asked in the beginning, what is the growth
 
 ### Data visualization
 
-But first an intermezo into the world of good data visualization.
-For the longest time I wanted to use something beyond Plots.GR.
-GR is fine and all but not what I would call flashy (this not have to be a bad thing!).
-Going way flashier than GR is Makie.jl.
-But Makie.jl is also more work, because it offers full controll of almost everything within the plot.
+We are going to use the good old default [Plots.jl](https://docs.juliaplots.org/stable/) package with the [GR](https://github.com/jheinen/GR.jl) backend.
+It will allow us to have very detailed controll over the plot while looking okayish.
 
-Let's start with something simple, four points as scatter plot with four colors."
+In the beginning a powerlaw was mentioned.
+That means an appropriate way to display data is a log-log scaling.
+Using the `plot()` we simple set `axis=:log` (note the : in front of log) to get the job done.
+
+One more thing needs to be done, before actually calling `plot()`.
+The data we have collect is rather uniform distributed with two time intervals.
+From time step 1 to time step 10000 we sample every 10th time step above that value we sample *only* every 10000th time step.
+Showing all data would end in a mess because the density of the points is shifted towards the late times.
+It is therefore helpful to thin out the data and use only a smaller subset, which we do with `log_t`.
+"
+
+# ╔═╡ 5a8e4fd7-4786-4ce4-b1ae-6a6ea645a3a0
+# Some data sampling for loglog plots
+# Instead of display all data, only a subset is shown.
+# Makes the plot easier to read.
+log_t = [1, 2, 3, 4, 6, 10, 20, 30, 40, 60, 100, 200, 300, 400, 600, 900, 1001, 1002, 1003, 1005, 1007, 1010, 1015, 1022, 1030, 1040, 1055, 1078, 1110, 1160, 1250, 1360, 1500, 1700, 2000, 2500, 3200, 4200, 5600, 7800, 10900]
 
 # ╔═╡ 4022cd85-8ecf-4781-9c02-66213b544203
-md"Okay that was not too bad.
-
-What we want is a line plot with markers in loglog scaling.
-Filled with the data we have computed."
-
-# ╔═╡ 52ebc071-3a4b-41d3-876c-b1fe61276d27
 begin
 	time_exp = @subset(coalescene_data, :g_x .== "const").t_norm
-	bridge_data = @subset(coalescene_data, :g_x .== "tanh5").bridge_min ./ 171
+	bridge_const = @subset(coalescene_data, :g_x .== "const").bridge_min ./ 171
+	fit_t = 1e-5:100
+	
+	plot(time_exp[log_t], bridge_const[log_t], 
+		label="γ=γ₀",
+		ylabel = "h₀/R₀", 
+		xlabel = "t/τ",
+		st = :scatter,
+		axis=:log, 
+		l=(3, :auto),
+		grid = false,
+		xticks=([0.001, 0.01, 0.1, 1, 10], ["10⁻³", "10⁻²", "10⁻¹", "10⁰", "10¹"]), # Axis labeling
+		legendfontsize = 14,		# legend font size
+    	tickfontsize = 14,			# tick font and size
+    	guidefontsize = 15,
+		legend=:topleft,
+		marker = (:circle, 8, 0.6, Plots.stroke(0, :gray)),
+		)
+	
+	plot!(fit_t, 0.0105 .* fit_t.^(2/3), l=(3, :black, :dash), label="f(x) ∝ t^(2/3)")
+	plot!(xlim=(5e-4, 30), ylim=(1e-3, 0.12))
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -1955,9 +1981,9 @@ version = "0.9.1+5"
 # ╟─f9849f21-02db-4bc6-ac7c-c3470c4d9bf5
 # ╟─23623020-3992-499d-aba5-37488b92797f
 # ╟─d0c30d75-4e53-401b-82ef-b974d6ad170b
-# ╠═5053ff78-1a91-4912-9360-ab6e1dbcff61
+# ╟─5053ff78-1a91-4912-9360-ab6e1dbcff61
 # ╟─fda64125-84cf-43cb-9fc9-40fff5144770
+# ╟─5a8e4fd7-4786-4ce4-b1ae-6a6ea645a3a0
 # ╠═4022cd85-8ecf-4781-9c02-66213b544203
-# ╠═52ebc071-3a4b-41d3-876c-b1fe61276d27
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
