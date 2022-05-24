@@ -49,14 +49,14 @@
  \affiliation{Helmholtz Institute Erlangen-N\"urnberg for Renewable Energy,\\
   Forschungszentrum J\"ulich,
   F\"urther Strasse 248, 90429 N\"urnberg, Germany}%
-  \affiliation{Department of Chemical and Biological Engineering {\color{red}Ich bin eingeschrieben bei der Physik}, Friedrich-Alexander-Universit\"at Erlangen-N\"urnberg, F\"{u}rther Stra{\ss}e 248, 90429 N\"{u}rnberg, Germany}%
+  \affiliation{Department of Physics, Friedrich-Alexander-Universität Erlangen-Nürnberg, \\Fürther Straße 248, 90429 Nürnberg, Germany}%
  \author{K. Missios}%
 %\email{missios@ruc.dk}
  \affiliation{IMFUFA, Department of Science and Environment,\\ Roskilde University, Postbox 260, DK-4000 Roskilde, Denmark}%
- \author{H. Scheufler}%
+%\author{H. Scheufler}%
 %\email{henning.scheufler@dlr.de}
- \affiliation{DLR German Aerospace Center,\\ Institute of Space Systems, 28359 Bremen, Germany}%
- \author{J. P. Rønby}%
+%\affiliation{DLR German Aerospace Center,\\ Institute of Space Systems, 28359 Bremen, Germany}%
+ \author{J. P. Roenby}%
 \email{johan@ruc.dk}
  \affiliation{IMFUFA, Department of Science and Environment,\\ Roskilde University, Postbox 260, DK-4000 Roskilde, Denmark}%
 \date{\today}
@@ -169,11 +169,16 @@ From an experimental point of view, it could be challenging to precisely control
 Given the fact that other flow contributions such as heat transport and therefore evaporation should be taken into account as well.
 Leaving aside the general treatment of arbitrary surface tension gradients in experiments, a first step would be to introduce a sharp gradient.
 First Riegler and Lazar and later Karpitschka et al. have shown that a straightforward realization of a sharp gradient can be achieved with two different but miscible liquids~\cite{doi:10.1021/la800630w, karpitschka2014sharp, doi:10.1021/la500459v}. 
+
+Bringing surface curvature, surface energy gradients and viscous dissipation into balance at a quasi stationary state the film thickness can be approximate with
+\begin{equation}
+    \partial_x^3 h = 3 \frac{Ca}{h^2} - 3\partial_x\gamma 
+\end{equation}
 Emerging from that droplet mixture is a surface velocity $u_s$~\cite{PhysRevLett.109.066103}
 \begin{equation}\label{eq:Karpitschka_vel}
     u_s = u|_{z=h} = \frac{3v_N}{2} + h\frac{\partial_x\gamma}{4\mu},
 \end{equation}
-where $v_N$ is the velocity of 
+where $v_N$ is the velocity of the neck moving towards higher surface tension.
 
 \section{Method}\label{sec:method}
 The method we are using is a numerical one that iteratively solves Eq.~(\ref{eq:thin_with_marangoni}).
@@ -248,10 +253,11 @@ There is however a difference to the model used in refs.~\cite{doi:10.1021/la500
 The inclusion of the disjoining pressure allows testing the non-coalescence criteria for smaller scales, well below $1mm$ droplet diameter~\cite{karpitschka2014sharp}.
 
 \section{Results}\label{sec:results}
+
 The first scenario we want to test is the simple case of $\partial_x\gamma(x) = 0$.
 Therefore a constant surface tension across the whole domain, which is resembled in Eq.~(\ref{eq:thin_film_simple}).
 This case has been studied extensively both in experiments and with theory, see refs.~\cite{eggers_lister_stone_1999, PhysRevLett.95.164503, PhysRevLett.111.144502, duchemin_eggers_josserand_2003}. 
-Given the contact angle regime the liquid bridge $h_0(t)$ that connects these two droplets grows according to the powerlaw 
+Given a small contact contact angle ($\theta \ll \pi/2$) the connecting liquid bridge $h_0(t)$ should follow the powerlaw 
 \begin{equation}\label{eq:bridge_power23}
     h_0(t) \propto t^{2/3},
 \end{equation}
@@ -264,6 +270,14 @@ and capillary pressure~\cite{doi:10.1021/la800630w}
     p_{\text{c}} = \frac{2\gamma}{r} \propto \frac{\gamma}{h_0},
 \end{equation}
 where we assume that $h_0$ scales similar to $r$ the radius of curvature at the touching region.
+In Fig.
+
+\begin{figure}
+    \centering
+    \includegraphics{}
+    \caption{Caption}
+    \label{fig:my_label}
+\end{figure}
 
 \subsection{Bridge growth}\label{subsec:growth}
 
@@ -284,9 +298,28 @@ In this work we have repeated the results found by Karpitschka et al., where two
 
 \begin{itemize}
     \item May I leave comments here?
+    
+    \textcolor{pyblue}{Stefan}: You may do!
+    
     \item I am member of physics departement not Engenering is that important?
+    
+    \textcolor{pyblue}{Stefan}: I look it up and change that, if you what is the correct affil you can change it as well.
+    
     \item \cite{doi:10.1021/la500459v} states that $\Pi(h)$ is neglectable. Maybe do simulations with and without disjoining pressure, that should be a matter of just commenting that part out. If you are lucky it runs stable without major issues and you can show that in your regime there indeed is a difference taking disjoining pressure into account, however big it turns out to be. 
-    \item Again \cite{doi:10.1021/la500459v}. In there experiment the surface tension gradient is induced by different liquids. In Figure 2 3b) you see the droplets in the non-coalesence case move thus the surface tension profile moves to. That may be worth to take into account.
+    
+    \textcolor{pyblue}{Stefan}: It will not work.
+    There is an interface and ``dry`` spots, dry spots can only be done with disjoining pressure.
+    I tested this some time ago for some other reason.
+    
+    My idea is to work out the modified equation with the inclusion of the disjoining pressure.
+    But feel free to work on it if you find it interesting.
+    
+    Theory $>$ Simulation/Experiments!
+    
+    \item Again \cite{doi:10.1021/la500459v}. In their experiment the surface tension gradient is induced by different liquids. In Figure 2 3b) you see the droplets in the non-coalesence case move thus the surface tension profile moves to. That may be worth to take into account.
+    
+    \textcolor{pyblue}{Stefan}: Yeah I know.
+    The PRL~\cite{PhysRevLett.109.066103} kind of explains why, see Eqs.~(1,2,3).
 \end{itemize}
 
 %\input{|python your_script.py}
