@@ -65,7 +65,7 @@ begin
 end
 
 # ╔═╡ 94886a7f-fc0e-434e-9338-bb92d5442542
-md"## Data collection
+md"## Numerical experiments
 
 Automation is the friend of every software developer, assuming it works.
 Here we follow this ideal of having a single script to create all the data we desire.
@@ -266,47 +266,97 @@ It is therefore helpful to thin out the data and use only a smaller subset, whic
 # Makes the plot easier to read.
 log_t = [1, 2, 3, 4, 6, 10, 20, 30, 40, 60, 100, 200, 300, 400, 600, 900, 1001, 1002, 1003, 1005, 1007, 1010, 1015, 1022, 1030, 1040, 1055, 1078, 1110, 1160, 1250, 1360, 1500, 1700, 2000, 2500, 3200, 4200, 5600, 7800, 10900]
 
-# ╔═╡ f5b342f8-2e6c-4776-bd4d-aacbfa9c6a1b
-# Here we can switch the backend of Plots.jl, gr() is the default one.
-# It works surprisingly well.
-gr()
+# ╔═╡ 9cd40341-6b0c-49f2-9371-ab03e42227d5
+md"Basically a lot of try and error led to the above `log_t` array.
+
+Using this array to display the data in a loglog plot can be seen in the figure below.
+Here we finally plot the growth of the liquid bridge for different surface tension fields.
+" 
 
 # ╔═╡ 4022cd85-8ecf-4781-9c02-66213b544203
 begin
 	time_exp = @subset(coalescene_data, :g_x .== "const").t_norm
 	bridge_const = @subset(coalescene_data, :g_x .== "const").bridge_min ./ 171
 	fit_t = 1e-5:100
+	label_dict = Dict("const" => "γ=γ₀", "step" => "γ=Θ(x)", "tanh1" =>"γ=s(x;1)", "tanh2" =>"γ=s(x;2)", "tanh5" =>"γ=s(x;5)", "tanh10" =>"γ=s(x;10)", "tanh20" =>"γ=s(x;20)", "tanh50" =>"γ=s(x;50)", "tanh100" =>"γ=s(x;100)", "tanh200" =>"γ=s(x;200)")
+	marker_dict = Dict(1 => :d, 2 => :s, 3 => :r, 4 => :h, 5 => :star4, 6 => :ut, 7 => :dt, 8 => :p, 9 => :lt, 10 => :s, 2 => :s, 2 => :s, 2 => :s)
 	
-	plot(time_exp[log_t], bridge_const[log_t], 
-		label="γ=γ₀",
+	bridge_plot = plot(time_exp[log_t], bridge_const[log_t], 
+		label=label_dict["const"],
 		ylabel = "h₀/R₀", 
 		xlabel = "t/τ",
 		st = :scatter,
 		axis=:log, 
 		l=(3, :auto),
 		grid = false,
-		xticks=([0.001, 0.01, 0.1, 1, 10], ["10⁻³", "10⁻²", "10⁻¹", "10⁰", "10¹"]), # Axis labeling
-		legendfontsize = 14,		# legend font size
+		xticks=([0.001, 0.01, 0.1, 1, 10, 100], ["10⁻³", "10⁻²", "10⁻¹", "10⁰", "10¹", "10²"]), # Axis labeling
+		yticks=([0.001, 0.01, 0.1], ["10⁻³", "10⁻²", "10⁻¹"]), # Axis labeling
+		yminorticks=10, 
+		legendfontsize = 12,		# legend font size
     	tickfontsize = 14,			# tick font and size
     	guidefontsize = 15,
 		legend=:topleft,
 		marker = (:circle, 8, 0.6, Plots.stroke(0, :gray)),
 		)
+	for i in enumerate(γ_names[2:end])
+		plot!(time_exp[log_t], @subset(coalescene_data, :g_x .== i[2]).bridge_min[log_t] ./ 171, 
+			label=label_dict[i[2]],
+			st = :scatter,
+			marker = (marker_dict[i[1]], 8, 0.6, Plots.stroke(0, :gray)),
+			)
+	end
+	plot!(fit_t, 0.0105 .* fit_t.^(2/3), l=(3, :black, :dash), label="∝ tᵅ")
+	plot!(xlim=(1e-3, 200), ylim=(4e-4, 0.15))
+end
 
-	plot!(time_exp[log_t], @subset(coalescene_data, :g_x .== "step").bridge_min[log_t] ./ 171, 
-		label="γ=step",
+# ╔═╡ 0e21314c-c763-48da-b1eb-73b4414cba23
+savefig(bridge_plot, "..\\figures\\bridge_evo.svg")
+
+# ╔═╡ 3eb1f305-2773-47c6-8ee0-a662be6a7d83
+begin
+	asym_const = @subset(coalescene_data, :g_x .== "const").skewness
+	
+	skew_plot = plot(time_exp[log_t], asym_const[log_t], 
+		label=label_dict["const"],
+		ylabel = "μ₃", 
+		xlabel = "t/τ",
+		st = :scatter,
+		xaxis=:log, 
+		l=(3, :auto),
+		grid = false,
+		xticks=([0.001, 0.01, 0.1, 1, 10], ["10⁻³", "10⁻²", "10⁻¹", "10⁰", "10¹"]), # Axis labeling
+		# yticks=([0.001, 0.01, 0.1], ["10⁻³", "10⁻²", "10⁻¹"]), # Axis labeling
+		# yminorticks=10, 
+		legendfontsize = 14,		# legend font size
+    	tickfontsize = 14,			# tick font and size
+    	guidefontsize = 15,
+		legend= :topleft,
+		marker = (:circle, 8, 0.6, Plots.stroke(0, :gray)),
+		)
+
+	plot!(time_exp[log_t], @subset(coalescene_data, :g_x .== "step").skewness[log_t], 
+		label=label_dict["step"],
 		st = :scatter,
 		marker = (:d, 8, 0.6, Plots.stroke(0, :gray)),
 		)
-	plot!(time_exp[log_t], @subset(coalescene_data, :g_x .== "tanh10").bridge_min[log_t] ./ 171, 
-		label="γ=tanh10",
+	plot!(time_exp[log_t], @subset(coalescene_data, :g_x .== "tanh10").skewness[log_t], 
+		label=label_dict["tanh10"],
 		st = :scatter,
 		marker = (:s, 8, 0.6, Plots.stroke(0, :gray)),
 		)
-	
-	plot!(fit_t, 0.0105 .* fit_t.^(2/3), l=(3, :black, :dash), label=L"\propto t^{2/3}")
-	plot!(xlim=(1e-3, 30), ylim=(1e-3, 0.12))
+	plot!(time_exp[log_t], @subset(coalescene_data, :g_x .== "tanh200").skewness[log_t], 
+		label=label_dict["tanh200"],
+		st = :scatter,
+		marker = (:h, 8, 0.6, Plots.stroke(0, :gray)),
+	)
+	lens!([0.8, 3], [-0.02, 0.02], 
+		grid=false, 
+		inset = (1, bbox(0.48, 0.05, 0.4, 0.4)))
+	plot!(xlim=(1e-3, 200))
 end
+
+# ╔═╡ 91023ffe-3ffe-4ab9-a42a-b5cd299214a7
+savefig(skew_plot, "..\\figures\\skew_evo.svg")
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1998,9 +2048,12 @@ version = "0.9.1+5"
 # ╟─23623020-3992-499d-aba5-37488b92797f
 # ╟─d0c30d75-4e53-401b-82ef-b974d6ad170b
 # ╟─5053ff78-1a91-4912-9360-ab6e1dbcff61
-# ╠═fda64125-84cf-43cb-9fc9-40fff5144770
+# ╟─fda64125-84cf-43cb-9fc9-40fff5144770
 # ╟─5a8e4fd7-4786-4ce4-b1ae-6a6ea645a3a0
-# ╠═f5b342f8-2e6c-4776-bd4d-aacbfa9c6a1b
-# ╠═4022cd85-8ecf-4781-9c02-66213b544203
+# ╟─9cd40341-6b0c-49f2-9371-ab03e42227d5
+# ╟─4022cd85-8ecf-4781-9c02-66213b544203
+# ╠═0e21314c-c763-48da-b1eb-73b4414cba23
+# ╟─3eb1f305-2773-47c6-8ee0-a662be6a7d83
+# ╠═91023ffe-3ffe-4ab9-a42a-b5cd299214a7
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
