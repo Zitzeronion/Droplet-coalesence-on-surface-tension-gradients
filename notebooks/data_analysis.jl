@@ -292,6 +292,17 @@ begin
 		legend=:topleft,
 		marker = (:circle, 8, 0.6, Plots.stroke(0, :gray)),
 		)
+
+	plot!(time_exp[log_t], @subset(coalescene_data, :g_x .== "step").bridge_min[log_t] ./ 171, 
+		label="γ=step",
+		st = :scatter,
+		marker = (:d, 8, 0.6, Plots.stroke(0, :gray)),
+		)
+	plot!(time_exp[log_t], @subset(coalescene_data, :g_x .== "tanh10").bridge_min[log_t] ./ 171, 
+		label="γ=tanh10",
+		st = :scatter,
+		marker = (:s, 8, 0.6, Plots.stroke(0, :gray)),
+		)
 	
 	plot!(fit_t, 0.0105 .* fit_t.^(2/3), l=(3, :black, :dash), label=L"\propto t^{2/3}")
 	plot!(xlim=(1e-3, 30), ylim=(1e-3, 0.12))
