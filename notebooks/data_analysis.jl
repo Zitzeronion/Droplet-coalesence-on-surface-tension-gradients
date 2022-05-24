@@ -266,6 +266,11 @@ It is therefore helpful to thin out the data and use only a smaller subset, whic
 # Makes the plot easier to read.
 log_t = [1, 2, 3, 4, 6, 10, 20, 30, 40, 60, 100, 200, 300, 400, 600, 900, 1001, 1002, 1003, 1005, 1007, 1010, 1015, 1022, 1030, 1040, 1055, 1078, 1110, 1160, 1250, 1360, 1500, 1700, 2000, 2500, 3200, 4200, 5600, 7800, 10900]
 
+# ╔═╡ f5b342f8-2e6c-4776-bd4d-aacbfa9c6a1b
+# Here we can switch the backend of Plots.jl, gr() is the default one.
+# It works surprisingly well.
+gr()
+
 # ╔═╡ 4022cd85-8ecf-4781-9c02-66213b544203
 begin
 	time_exp = @subset(coalescene_data, :g_x .== "const").t_norm
@@ -288,8 +293,8 @@ begin
 		marker = (:circle, 8, 0.6, Plots.stroke(0, :gray)),
 		)
 	
-	plot!(fit_t, 0.0105 .* fit_t.^(2/3), l=(3, :black, :dash), label="f(x) ∝ t^(2/3)")
-	plot!(xlim=(5e-4, 30), ylim=(1e-3, 0.12))
+	plot!(fit_t, 0.0105 .* fit_t.^(2/3), l=(3, :black, :dash), label=L"\propto t^{2/3}")
+	plot!(xlim=(1e-3, 30), ylim=(1e-3, 0.12))
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -1982,8 +1987,9 @@ version = "0.9.1+5"
 # ╟─23623020-3992-499d-aba5-37488b92797f
 # ╟─d0c30d75-4e53-401b-82ef-b974d6ad170b
 # ╟─5053ff78-1a91-4912-9360-ab6e1dbcff61
-# ╟─fda64125-84cf-43cb-9fc9-40fff5144770
+# ╠═fda64125-84cf-43cb-9fc9-40fff5144770
 # ╟─5a8e4fd7-4786-4ce4-b1ae-6a6ea645a3a0
+# ╠═f5b342f8-2e6c-4776-bd4d-aacbfa9c6a1b
 # ╠═4022cd85-8ecf-4781-9c02-66213b544203
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
