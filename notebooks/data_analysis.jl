@@ -285,6 +285,42 @@ begin
 		axis=:log, 
 		l=(3, :auto),
 		grid = false,
+		xticks=([0.001, 0.01, 0.1, 1, 10, 100], ["10⁻³", "10⁻²", "10⁻¹", "10⁰", "10¹", "10²"]), # Axis labeling
+		yticks=([0.001, 0.01, 0.1], ["10⁻³", "10⁻²", "10⁻¹"]), # Axis labeling
+		yminorticks=10, 
+		legendfontsize = 12,		# legend font size
+    	tickfontsize = 14,			# tick font and size
+    	guidefontsize = 15,
+		legend=:topleft,
+		marker = (:circle, 8, 0.6, Plots.stroke(0, :gray)),
+		)
+	for i in enumerate(γ_names[2:end])
+		plot!(time_exp[log_t], @subset(coalescene_data, :g_x .== i[2]).bridge_min[log_t] ./ 171, 
+			label=label_dict[i[2]],
+			st = :scatter,
+			marker = (marker_dict[i[1]], 8, 0.6, Plots.stroke(0, :gray)),
+			)
+	end
+	plot!(fit_t, 0.0105 .* fit_t.^(2/3), l=(3, :black, :dash), label="∝ tᵅ")
+	plot!(xlim=(1e-3, 200), ylim=(4e-4, 0.15))
+	
+end
+
+# ╔═╡ 0e21314c-c763-48da-b1eb-73b4414cba23
+savefig(bridge_plot, "..\\figures\\bridge_evo.svg")
+
+# ╔═╡ 3eb1f305-2773-47c6-8ee0-a662be6a7d83
+begin
+	asym_const = @subset(coalescene_data, :g_x .== "const").skewness
+	
+	skew_plot = plot(time_exp[log_t], asym_const[log_t], 
+		label=label_dict["const"],
+		ylabel = "μ₃", 
+		xlabel = "t/τ",
+		st = :scatter,
+		xaxis=:log, 
+		l=(3, :auto),
+		grid = false,
 		xticks=([0.001, 0.01, 0.1, 1, 10], ["10⁻³", "10⁻²", "10⁻¹", "10⁰", "10¹"]), # Axis labeling
 		legendfontsize = 14,		# legend font size
     	tickfontsize = 14,			# tick font and size
@@ -2000,7 +2036,10 @@ version = "0.9.1+5"
 # ╟─5053ff78-1a91-4912-9360-ab6e1dbcff61
 # ╠═fda64125-84cf-43cb-9fc9-40fff5144770
 # ╟─5a8e4fd7-4786-4ce4-b1ae-6a6ea645a3a0
-# ╠═f5b342f8-2e6c-4776-bd4d-aacbfa9c6a1b
+# ╟─9cd40341-6b0c-49f2-9371-ab03e42227d5
 # ╠═4022cd85-8ecf-4781-9c02-66213b544203
+# ╠═0e21314c-c763-48da-b1eb-73b4414cba23
+# ╟─3eb1f305-2773-47c6-8ee0-a662be6a7d83
+# ╠═91023ffe-3ffe-4ab9-a42a-b5cd299214a7
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
