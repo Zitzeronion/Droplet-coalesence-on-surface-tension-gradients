@@ -9,6 +9,7 @@
 %frontmatterverbose,
 %]{revtex4-1}
 \documentclass[twocolumn,amsmath,amssymb,showpacs,pre,nofootinbib,superscriptaddress]{revtex4-1} %,preprint,jcp
+% \documentclass[journal=jacsat,manuscript=article]{achemso}
 
 \bibstyle{apsrev}
 %\usepackage{docs}%
@@ -64,14 +65,15 @@
 \begin{abstract}
 We numerically study the coalescence dynamics of two sessile droplets.
 The droplets are placed on top of a rigid substrate with a contact angle of $\theta_{eq.} = \pi/9$. 
-% Due to minimization of surface energy, the two droplets are likely to coalescence into a single droplet.
 Having a highly wettable substrate ($\theta_{eq} \ll \pi/2$) theory predicts that the bridge height ($h_0$) scales according to $h_0(t) \propto t^{2/3}.$
-This behavior can be altered with e.g. surface tension gradients ($\partial\gamma(x) \neq 0$). 
-Which appear for example using heating devices, surfactants or having different but miscible liquids.
+This behavior can be altered with e.g. surface tension gradients ($\partial\gamma \neq 0$). 
+These gradients appear for example using heating devices, surfactants or having different but miscible liquids.
 Instead of coalescence, these gradients can lead to a stable two droplet state. 
-In this work, we focus on the influence of the surface tension gradient in the thin film regime. 
-We therefore introduce a disjoining pressure and couple it to the surface tension gradient.
-Showing that coalescence can be suppressed and retrieving the $2/3$ powerlaw for a vanishing gradient.
+In this work, we focus on two aspects of this problem.
+First being the concrete choice of the surface tension gradient.
+And second, the reduction of scale towards a regime in which the disjoining pressure is important. 
+To do so, we introduce a disjoining pressure and couple it to the local surface tension.
+Showing that coalescence can be suppressed but also the theoretical $2/3$ powerlaw emerges for a vanishing gradient.
 Between those two extrema we find intermediate bridge growth and asymmetric coalescence.
 \end{abstract}
 
@@ -83,70 +85,74 @@ Between those two extrema we find intermediate bridge growth and asymmetric coal
 The coalescence or non-coalescens of liquid droplets is an interesting problem to study. 
 Both scenarios can be observed in many instances of our every day life and in various industrial processes.
 Coalescence of sessile droplets happens, for example, when vapor condenses on the lid of a pot.
-Starting with the nucleation of small droplets, which quickly assemble in larger drops either naturally~\cite{PhysRevA.43.1906} or due to artifical factors such as surface structure~\cite{C1SM06219K}. 
-Condensation and coarsening can effectively be used in so-called fog harvesting devices, where ambient water vapor becomes an effective source for liquid water~\cite{zhang2015inkjet, shi2018fog}.
+Starting with the nucleation of small droplets, which quickly assemble in larger drops either naturally~\cite{PhysRevA.43.1906} or due to artificial factors such as surface structure or patterning~\cite{C1SM06219K}. 
+This effect can effectively be used in so-called fog harvesting devices. 
+These devices can be an effective source for liquid water as they collect ambient water vapor~\cite{zhang2015inkjet, shi2018fog}.
 Apart from fog harvesting, coalescence or rather the control of it plays an important part in inkjet printing and printable electronics~\cite{jo2009evaluation, singh2010inkjet, Kim_2005, Luechinger_2008}.
-But also in various microfluidic devices for mixing purposes at low Reynolds numbers coalescence of droplets serves as an effective technique~\cite{https://doi.org/10.1002/pen.760352206, doi:10.1063/1.858199}. 
+But also in various microfluidic devices for mixing purposes at low Reynolds numbers ($Re < 1$). 
+The coalescence of droplets in this regime can serve as an effective mixing technique~\cite{https://doi.org/10.1002/pen.760352206, doi:10.1063/1.858199}. 
 
 On the other hand, there are many applications that require droplets not to coalesce.
-In hot summer days a fine water spray can help the body to cool down.
-Single, small droplets advect the heat from the body and transfer it into the surroundings~\cite{kim2007spray}.
-Cooling hot, e.g. near the boiling point, structures is another issue~\cite{JIA2003829}.
+In hot summer days, a fine water spray can help the body to cool down.
+Single, small droplets advect the heat from the body and transfer it into the surrounding fluid (air)~\cite{kim2007spray}.
+% Cooling hot, structures, as such structures near boiling point is another issue which ~\cite{JIA2003829}.
 Apart from cooling, emulsions are an illustrative example of systems where droplets should not coalesce.
 Thinking about Mayonnaise where due to vigorously stirring the oil breaks up in small droplets that mix with the water of the egg yolk.
-Proteins and additions like mustard stabilize this state and keep the oil from coalescing~\cite{harrison1985factors, DEPREE2001157}.
+Proteins and additions like mustard stabilize this state and keep the oil from coalescing, which has a significant effect on the rheology of this mixture~\cite{harrison1985factors, DEPREE2001157}.
 
 Independent of these examples, droplet coalescence has attracted much attention in the past two decades, see refs.~\cite{eggers_lister_stone_1999, duchemin_eggers_josserand_2003, PhysRevLett.95.164503, PhysRevLett.106.114501, doi:10.1063/1.4828721}. 
-The basic theoretical arguments, with some modifications, hold true for even more complex scenarios such as coalescence of liquid lenses~\cite{PhysRevLett.124.194502} or quasi 2D liquids~\cite{klopp2020self, doi:10.1021/acs.langmuir.0c02139}.
-What is common to all studies however is the fact that the equilibrium state is one where the two droplets have coalesced.
+The basic theoretical arguments, therefore the minimization of surface are and minimization of curvature due to capillarity, hold true for even more complex scenarios. 
+Within the same assumptions, one can explain the coalescence of liquid lenses~\cite{PhysRevLett.124.194502} or quasi 2D liquids~\cite{klopp2020self, doi:10.1021/acs.langmuir.0c02139}.
+What is common to all studies is the fact that the equilibrium state is one where the two droplets have coalesced.
+This is of course in agreement with a minimized surface area and minimal curvature.
 Interestingly, this doesn't always apply.
-Quite recently, Kern et al. have shown that viscoplasticity can lead to state uncoalesced states~\cite{https://doi.org/10.48550/arxiv.2203.15617}.
-What has been known for some time however is that a surface tension gradient influences the coalescence process. 
-This has been shown by Karpitschka et al. in experiments with different miscible liquids~\cite{PhysRevLett.109.066103, doi:10.1021/la500459v, karpitschka2014sharp, bruning2018delayed}.
-In their work, Karpitschka et al. identify an effective Marangoni flow that stabilizes the two droplet system.
 
+Quite recently, Kern et al. have shown that viscoplasticity can lead to stable twin drop states~\cite{https://doi.org/10.48550/arxiv.2203.15617}.
+What has been known for some time however is that a surface tension gradient influences the coalescence. 
+This has been shown by Karpitschka et al. in experiments with different miscible liquids~\cite{PhysRevLett.109.066103, doi:10.1021/la500459v, karpitschka2014sharp, bruning2018delayed}, but has been studies with numerical experiments as well by Bocia and Bestehorn~\cite{PhysRevE.82.036312, borcia2011coalescence}.
+In their work, Karpitschka et al. identify an effective Marangoni flow that stabilizes the two droplet system.
 We revisit that problem with numerical simulations.
 First, we move to the regime where the droplet become small and disjoining pressure can no longer be neglected.
-Second, we address the impact of the surface tensions gradient beyond the reduction to its absolute contrast.
-Therefore, asking if the concrete function of $\gamma(x)$ influences the overall dynamic and turn non-coalescing states into coalescing ones.
-On the same note we discuss the growth laws of the liquid bridge and address Marangoni dominated coalescence.
+Second, we address the impact of the surface tension beyond the reduction to its absolute contrast.
+Therefore, asking if the concrete function of $\gamma(x)$ can turn non-coalescing states into coalescing ones.
+Within this framework, we discuss the growth law of the liquid bridge and symmetry of the coalescence.
 
 This paper is organized as follows:
 Starting in the next section, Sec.~\ref{sec:theory}, we discuss the underlying theoretical model.
-Introducing the thin film equation with an additional term due to the Marangoni flow and the disjoining pressure $\Pi(h)$. 
-Followed by our choice for modelling $\Pi(h)$, which comprises of thickness dependent powerlaw and a wettability component. 
-In Sec.~\ref{sec:method} we discuss the numerical method we use to solve the thin film equation.
-We show how to construct an addition term to account for the flow induced due to the Marangoni effect.
+Introducing the thin film equation with an additional term due to the Marangoni flow. 
+Followed by our choice for modelling $\Pi(h)$ the disjoining pressure functional, which consists of thickness dependent powerlaw and a wettability component. 
+In Sec.~\ref{sec:method} we discuss the numerical method we use to solve the thin film equation from the previous section.
+We show how to construct an addition term to account for the flow induced by the Marangoni effect.
+Supplying as well the three functions we use for $\gamma(x)$. 
 The results are presented and discussed in Sec.~\ref{sec:results}.
-Showing, first, coalescence and non-coalescence with constant and Heaviside like surface tension.
-Relaxing the sharp gradient in the second half of the results section.
+Showing, first, coalescence and non-coalescence based on our choice of $\gamma(x)$.
+But also showing that a smoothly varying surface tension relaxes the non-coalescence behaviour.
 Finally, conclusions and summary are provided in Sec.~\ref{sec:sum_conclu}. 
 
 \section{Theory}\label{sec:theory}
 The theoretical approach we use to study this system is the lubrication approximation~\cite{Reynolds, RevModPhys.69.931, PhysRevE.63.011208}.
-Resulting in the thin film equation, which for a singular horizontal dimension reads~\cite{RevModPhys.81.739, RevModPhys.81.1131, THIELE2014399}
+Applying this approximation to the Navier Stokes yields the thin film equation, which for a singular horizontal dimension reads~\cite{RevModPhys.81.739, RevModPhys.81.1131, THIELE2014399}
 \begin{equation}\label{eq:thin_film_simple}
     \partial_t h = \partial_x \left(\frac{h^3}{3\mu}\partial_x p\right),
 \end{equation}
-where $\frac{h^3}{3\mu}$ is the mobility $m(h)$\footnote{$m(h) = h^3/3\mu$ is true only if one assumes a no-slip velocity boundary condition at $h=0$.}, $h(x,t)$ the thickness of the film, $\mu$ is the liquid's viscosity and $p$ it's pressure.
-The pressure in this model accounts for the liquid's surface tension, thus the interface minimization, as well as the for correct fluid substrate behavior (wetting)~\cite{PhysRevE.100.033313}.
+where $\frac{h^3}{3\mu}$ is the mobility $m(h)$\footnote{$m(h) = h^3/3\mu$ is true only for a no-slip velocity boundary condition.}, $h(x,t)$ is the thickness of the film at time $t$ and position $x$, $\mu$ is the liquid's viscosity, and $p$ it's pressure.
+The pressure accounts for both the surface tension, thus the interface minimization, and the for correct fluid substrate behavior (wetting)~\cite{PhysRevE.100.033313}.
 We can therefore write the pressure as
 \begin{equation}\label{eq:pressure}
     p = -\gamma \partial_x^2 h - \Pi(h),
 \end{equation}
-where the first term is the Laplacian of the liquid-vapor interface (the thickness) and $\Pi(h)$ is the derivative of an interaction potential that is often referred to as disjoining pressure~\cite{RevModPhys.69.931, RevModPhys.81.739, Peschka9275, PhysRevE.63.011208},
+where the first term is the Laplacian of the liquid-vapor interface and $\Pi(h)$ is the disjoining pressure~\cite{RevModPhys.69.931, RevModPhys.81.739, Peschka9275, PhysRevE.63.011208},
 \begin{equation}\label{eq:disjoin}
-    \Pi(h) = \kappa(\theta)\left[\left(\frac{h_{\ast}}{h}\right)^n - \left(\frac{h_{\ast}}{h}\right)^m\right].
+    \Pi(h) = K(\theta)\left[\left(\frac{h_{\ast}}{h}\right)^n - \left(\frac{h_{\ast}}{h}\right)^m\right].
 \end{equation}
-The prefactor $\kappa(\theta)\propto \gamma\cos(\theta)$ encodes the wettability and with it the contact angle.
-It further links the disjoining pressure to the Hamaker constant ($\mathcal{A}$) with~~\cite{PhysRevE.93.013120}
+The prefactor $K(\theta)\propto \gamma\cos(\theta)$ encodes the wettability and as such the equilibrium contact angle $\theta_{\text{eq.}}$.
+This prefactor also serves a link from the disjoining pressure to the Hamaker constant ($\mathcal{A}$) with~~\cite{PhysRevE.93.013120, bestehorn20033d, van1988interfacial}
 \begin{equation}
-    \mathcal{A} = 6\pi h_{\ast}^3\kappa(\theta).    
+    \mathcal{A} = 6\pi h_{\ast}^3 K(\theta).    
 \end{equation}
 Additionally, $h_{\ast}$ defines the thickness of the precursor layer, therefore the thickness where $\Pi(h_{\ast}) = 0$.
-For the reminder of this manuscript, we define $h(x,t) \le h_{\ast}$ as a dry spot.
-The pair of powers $(n,m)$ need to satisfy $n > m$ and $m > 1$. 
-Here we choose $(n,m)$ to be $(9,3)$, which is a widely adopted model that dates back to Schwartz and Eley~\cite{SCHWARTZ1998173, RevModPhys.81.739}.
+For the reminder of this manuscript, we define $h(x,t) \le h_{\ast}$ as a ``dry'' spot.
+The pair of powers $(n,m)$ need to satisfy $n > m$ and $m > 1$ and are chosen to be $(9,3)$, which resembles a  widely adopted model that was first introduced by Schwartz and Eley~\cite{SCHWARTZ1998173, RevModPhys.81.739}.
 
 \begin{figure}
     \centering
@@ -159,16 +165,44 @@ Here we choose $(n,m)$ to be $(9,3)$, which is a widely adopted model that dates
     \label{fig:schematics}
 \end{figure}
 In the presence of a surface tension gradient, Eq.~(\ref{eq:thin_film_simple}) requires an additional term.
-The modification is to account for an effective Marangoni flow~\cite{doi:10.1021/la500459v, karpitschka2014sharp, bestehorn20033d, doi:10.1021/la960488a}
+This term accounts for an effective Marangoni flow~\cite{doi:10.1021/la500459v, karpitschka2014sharp, bestehorn20033d, doi:10.1021/la960488a}
 \begin{equation}\label{eq:thin_with_marangoni}
-    \partial_t h = \partial_x \left(\frac{h^3}{3\mu}\partial_x p + \frac{h^2}{2\mu}\nabla\gamma\right).
+    \partial_t h = \partial_x \left(\frac{h^3}{3\mu}\partial_x p + \frac{h^2}{2\mu}\partial_x\gamma\right).
 \end{equation}
 Naturally in case of $\partial_x\gamma = 0$ we retrieve Eq.~(\ref{eq:thin_film_simple}).
-These gradients appear due to non-homogenized surfactant concentrations or space resolved heating profiles, e.g. with lasers~\cite{doi:10.1021/la960488a, NIKOLOV2002325, bruning2018delayed, wedershoven2014infrared}.
-From an experimental point of view, it could be challenging to precisely control these gradients.
-Given the fact that other flow contributions such as heat transport and therefore evaporation should be taken into account as well.
-Leaving aside the general treatment of arbitrary surface tension gradients in experiments, a first step would be to introduce a sharp gradient.
-First Riegler and Lazar and later Karpitschka et al. have shown that a straightforward realization of a sharp gradient can be achieved with two different but miscible liquids~\cite{doi:10.1021/la800630w, karpitschka2014sharp, doi:10.1021/la500459v}. 
+These gradients appear due to non-homogenized surfactant concentrations or space resolved heating profiles, e.g. with lasers~\cite{doi:10.1021/la960488a, NIKOLOV2002325, bruning2018delayed, wedershoven2014infrared} or due to different but miscible liquids~\cite{doi:10.1021/la800630w, karpitschka2014sharp, doi:10.1021/la500459v}. 
+
+\subsection{Flows}\label{subsec:flows_theory}
+Both Eq.~(\ref{eq:thin_with_marangoni}) define the dynamic of the system we are interested in.
+Going one step back and setting $\partial\gamma = 0$, we are left with a pure coalescence case.
+Following the argumentation of Riegler, Lazar and Eddie et al.~\cite{doi:10.1021/la800630w, PhysRevLett.111.144502} the dynamics is dictated by an strong capillary pressure,
+\begin{equation}\label{eq:cap_pressure}
+    P_{\text{cap.}} \sim\gamma\kappa \sim \frac{\gamma}{r} \sim \frac{\gamma}{h_0},
+\end{equation}
+where $\kappa$ is curvature of the liquid vapor interface and $r$ being the radius of curvature. 
+It is a fair assumption that the curvature is small far away from the neck and large around $h_0$.
+The resulting flow induces a dynamical or ``Bernulli'' pressure
+\begin{equation}\label{eq:P_Bernulli}
+    P_{\text{iner.}} \sim \rho v^2 \sim \rho\left(\frac{h_0}{t}\right)^2.
+\end{equation}
+Balancing Eqs.~(\ref{eq:cap_pressure}-\ref{eq:P_Bernulli}) and solving for $h_0$ therefore yields a growth law 
+\begin{equation}\label{eq:coal_powerlaw}
+    h_0(t) \propto t^{2/3},
+\end{equation}
+for a constant surface tension with contact angles below $\theta < \pi/2$~\cite{PhysRevLett.111.144502, keller2002breaking}.
+Recently, a similar growth law for the coalescence of liquid lenses has been experimentally observed and theoretically validate, see Hack et al.~\cite{PhysRevLett.124.194502}.
+
+In the scenario where $\partial\gamma \neq 0$ the balance between pressures is altered.
+Riegler and Lazar coupled Eq.~(\ref{eq:P_Bernulli}) to the difference in surface tension~\cite{doi:10.1021/la800630w}
+\begin{equation}\label{eq:P_bernulli_riegler}
+    P_{B} \sim \rho v^2 \sim \frac{\rho \Delta\gamma^2}{\mu^2}, 
+\end{equation}
+with the velocity,
+\begin{equation}\label{eq:vel_riegler}
+    v = \frac{h_0}{\mu}\partial_x\gamma\approx\frac{\Delta\gamma}{4\mu}\theta,
+\end{equation}
+where $\Delta\gamma = \gamma_1 - \gamma_2$ and $\gamma_i$ are the surface tensions of the two miscible liquids.
+Karptischka and Riegler later revisted the 
 
 Bringing surface curvature, surface energy gradients and viscous dissipation into balance at a quasi stationary state the film thickness can be approximate with
 \begin{equation}
@@ -226,7 +260,7 @@ Viscous friction with the substrate is contained in
 \begin{equation}\label{eq:fric_force}
     F_{\text{fric}} = -\nu \alpha_{\delta}(h) u,
 \end{equation}
-where $\nu=\mu/\rho_0$ is the fluid kinematic viscosity (related to the relaxation time $\tau$ by $\nu = c_s^2\left(\tau-\frac{\Delta}{2}\right)$).
+where $\nu=\mu/\rho_0$ is the fluid kinematic viscosity (related to the relaxation time $\tau$ by $\nu = c_s^2\left(\tau-\frac{\Delta t}{2}\right)$).
 The thickness dependent function $\alpha_{\delta}(h)$ is approximately an inverse mobility $m(h)$,
 \begin{equation}\label{eq:fric_alpha}
      \alpha_{\delta}(h) = \frac{6 h}{2h^2 + 6h\delta + 3\delta^2},
@@ -252,12 +286,64 @@ Performing the limits discussed in ref.~\cite{PhysRevE.100.033313, PhysRevE.104.
 There is however a difference to the model used in refs.~\cite{doi:10.1021/la500459v, karpitschka2014sharp}.
 The inclusion of the disjoining pressure allows testing the non-coalescence criteria for smaller scales, well below $1mm$ droplet diameter~\cite{karpitschka2014sharp}.
 
+For the surface tension field, $\gamma(x)$ we use three different functions. 
+First being just a constant surface tension, 
+\begin{equation}\label{eq:gamma_const}
+    \gamma^{\text{const.}}(x) = \gamma_0,
+\end{equation}
+with $\gamma_0$ as constant.
+Clearly in this case $\partial_x\gamma(x) = 0$.
+Second, to mimic a mixture of different liquids we use a Heaviside function
+\begin{equation}\label{eq:gamma_step}
+    \gamma^{\text{step}}(x) = \begin{cases}
+    \gamma_0\quad~~\qquad \text{for $x < L/2$}\\
+    \gamma_0 - \Delta\gamma \quad \text{for $x \ge L/2$}\\
+    \end{cases},
+\end{equation}
+with $\Delta\gamma$ being some percentage of $\gamma_0$.
+The third function interpolates smoothly between the two values $\gamma_0$ and $\gamma_0 -\Delta\gamma$ using a tangent hyperbolicus
+\begin{align}\label{eq:gamma_tanh}
+    \gamma^{\text{smooth}}(x) &= \gamma_0\abs{1 - \left(\frac{1}{2} - s(x;l,w)\right)} + \nonumber\\
+    &(\gamma_0 - \Delta\gamma)\left\{1 - \abs{1 - \left(\frac{1}{2} - s(x;l,w)\right)}\right\} 
+\end{align}
+where
+\begin{equation}\label{eq:smoothing}
+    s(x;l,w) = \frac{1}{2}\tanh\left(\frac{x - l}{w}\right),
+\end{equation}
+with $l$ being a coordinate where $\gamma^{\text{smooth}}(l) = \gamma_0 -\Delta\gamma/2$ and $w$ a smoothing width. 
+The spatially resolved value of the surface tension is then given to the pressure, see Eqs~(\ref{eq:pressure}-\ref{eq:disjoin}) and the Marangoni force term Eq.~(\ref{eq:force_gamma_grad}).
+
 \section{Results}\label{sec:results}
+Before we start to comment on the results, let us introduce the parameters of our numerical experiments and with them the relevant length and time scales.
+All experiments start with the same initial condition, which is a superposition of two barely overlapping circular segments (equivalent to spherical caps in three dimensions) as can be seen in Fig.~\ref{fig:schematics}. 
+Both droplets have a base radius $R_0 = 171\Delta x$, a maximum thickness $h_d = 30.15$ and form a contact angle $\theta = \pi/9$ with the substrate.
+The initial bridge height is measured to be $h_0(0) \approx 0.2$.
+Viscosity is set to be $\mu = 1/6$ and the slip length $\delta \approx h_b/2$ we will come back to this relatively large slip value.
+The surface tension $\gamma_0 = 10^{-5}$, while $\Delta\gamma = 2\cdot 10^{-6}$.
+For the disjoining pressure, Eq.~(\ref{eq:disjoin}) we use $h_{\ast} = 0.12$.
+All quantities are given in $l.b.u$ so-called lattice Boltzmann units.
+
+In agreement with previous studies, we choose the initial droplet's radius $R_0$ as the relevant scale to normalize length dependent quantities, e.g. $h_0(t)$.
+That leaves us with a choice for a relevant timescale.
+Choosing the inertio-capillary time 
+\begin{equation}\label{eq:inertio-cap-time}
+    \tau_{\text{ic.}} = \sqrt{\frac{\rho R_0^3}{\gamma}},
+\end{equation}
+where we use $\gamma = \max_x(\gamma(x)) = \gamma_0$ and $\rho = 1$.
+Inserting numbers yields a timescale $\tau_{\text{ic.}} \approx 7\cdot 10^5 \Delta t$. 
+
+\subsection{Bridge growth}\label{subsec:growth}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.48\textwidth]{Figures/bridge_evo_all.pdf}
+    \caption{Time evolution of the bridge growth for different surface tension gradients.}
+    \label{fig:bridge_growth}
+\end{figure}
 
 The first scenario we want to test is the simple case of $\partial_x\gamma(x) = 0$.
-Therefore a constant surface tension across the whole domain, which is resembled in Eq.~(\ref{eq:thin_film_simple}).
+Therefore reducing the numerical approach to solve Eq.~(\ref{eq:thin_film_simple}).
 This case has been studied extensively both in experiments and with theory, see refs.~\cite{eggers_lister_stone_1999, PhysRevLett.95.164503, PhysRevLett.111.144502, duchemin_eggers_josserand_2003}. 
-Given a small contact contact angle ($\theta \ll \pi/2$) the connecting liquid bridge $h_0(t)$ should follow the powerlaw 
+Given a small contact angle ($\theta \ll \pi/2$) the connecting liquid bridge $h_0(t)$ should follow the powerlaw 
 \begin{equation}\label{eq:bridge_power23}
     h_0(t) \propto t^{2/3},
 \end{equation}
@@ -270,23 +356,20 @@ and capillary pressure~\cite{doi:10.1021/la800630w}
     p_{\text{c}} = \frac{2\gamma}{r} \propto \frac{\gamma}{h_0},
 \end{equation}
 where we assume that $h_0$ scales similar to $r$ the radius of curvature at the touching region.
-In Fig.
-
-\begin{figure}
-    \centering
-    \includegraphics{}
-    \caption{Caption}
-    \label{fig:my_label}
-\end{figure}
-
-\subsection{Bridge growth}\label{subsec:growth}
-
+... see Fig.~\ref{fig:bridge_growth}
 
 
 \subsection{Flows}\label{subsec:flows}
 
 \subsection{Asymmetry}\label{subsec:skewness}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.48\textwidth]{Figures/skew_evo.pdf}
+    \caption{Skewenss $\mu_3$ displayed during the time evolution for various surface tension gradients.}
+    \label{fig:skewness}
+\end{figure}
 
+... see Fig.~\ref{fig:skewness}
 
 \section{Summary and Conclusions}\label{sec:sum_conclu}
 In this work we have repeated the results found by Karpitschka et al., where two sessile droplets although in contact do not coalesce~\cite{karpitschka2014sharp, doi:10.1021/la500459v}
@@ -297,18 +380,10 @@ In this work we have repeated the results found by Karpitschka et al., where two
 \subsection{Comments Tilman}
 
 \begin{itemize}
-    \item May I leave comments here?
-    
-    \textcolor{pyblue}{Stefan}: You may do!
-    
-    \item I am member of physics departement not Engenering is that important?
-    
-    \textcolor{pyblue}{Stefan}: I look it up and change that, if you what is the correct affil you can change it as well.
-    
     \item \cite{doi:10.1021/la500459v} states that $\Pi(h)$ is neglectable. Maybe do simulations with and without disjoining pressure, that should be a matter of just commenting that part out. If you are lucky it runs stable without major issues and you can show that in your regime there indeed is a difference taking disjoining pressure into account, however big it turns out to be. 
     
     \textcolor{pyblue}{Stefan}: It will not work.
-    There is an interface and ``dry`` spots, dry spots can only be done with disjoining pressure.
+    There is an interface and ``dry'' spots, dry spots can only be done with disjoining pressure.
     I tested this some time ago for some other reason.
     
     My idea is to work out the modified equation with the inclusion of the disjoining pressure.
