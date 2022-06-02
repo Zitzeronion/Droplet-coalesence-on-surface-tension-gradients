@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.5
+# v0.19.6
 
 using Markdown
 using InteractiveUtils
@@ -326,39 +326,6 @@ begin
 		l=(3, :auto),
 		grid = false,
 		xticks=([0.001, 0.01, 0.1, 1, 10], ["10⁻³", "10⁻²", "10⁻¹", "10⁰", "10¹"]), # Axis labeling
-		legendfontsize = 14,		# legend font size
-    	tickfontsize = 14,			# tick font and size
-    	guidefontsize = 15,
-		legend=:topleft,
-		marker = (:circle, 8, 0.6, Plots.stroke(0, :gray)),
-		)
-	for i in enumerate(γ_names[2:end])
-		plot!(time_exp[log_t], @subset(coalescene_data, :g_x .== i[2]).bridge_min[log_t] ./ 171, 
-			label=label_dict[i[2]],
-			st = :scatter,
-			marker = (marker_dict[i[1]], 8, 0.6, Plots.stroke(0, :gray)),
-			)
-	end
-	plot!(fit_t, 0.0105 .* fit_t.^(2/3), l=(3, :black, :dash), label="∝ tᵅ")
-	plot!(xlim=(1e-3, 200), ylim=(4e-4, 0.15))
-end
-
-# ╔═╡ 0e21314c-c763-48da-b1eb-73b4414cba23
-savefig(bridge_plot, "..\\figures\\bridge_evo.svg")
-
-# ╔═╡ 3eb1f305-2773-47c6-8ee0-a662be6a7d83
-begin
-	asym_const = @subset(coalescene_data, :g_x .== "const").skewness
-	
-	skew_plot = plot(time_exp[log_t], asym_const[log_t], 
-		label=label_dict["const"],
-		ylabel = "μ₃", 
-		xlabel = "t/τ",
-		st = :scatter,
-		xaxis=:log, 
-		l=(3, :auto),
-		grid = false,
-		xticks=([0.001, 0.01, 0.1, 1, 10], ["10⁻³", "10⁻²", "10⁻¹", "10⁰", "10¹"]), # Axis labeling
 		# yticks=([0.001, 0.01, 0.1], ["10⁻³", "10⁻²", "10⁻¹"]), # Axis labeling
 		# yminorticks=10, 
 		legendfontsize = 14,		# legend font size
@@ -391,6 +358,98 @@ end
 
 # ╔═╡ 91023ffe-3ffe-4ab9-a42a-b5cd299214a7
 savefig(skew_plot, "..\\figures\\skew_evo.svg")
+
+# ╔═╡ 4b234890-fb88-4dab-a4e4-88fde788c423
+md"## Theory
+
+The starting point is the thin film equation with the Marangoni term, therefore
+
+```math
+\partial_t h = \partial_x \bigg(\frac{h^3}{3\mu}\partial_x p + \frac{h^2}{2\mu}\partial_x\gamma\bigg).
+```
+The coalescence is driven by pressure.
+Pressure that is generated due to capillarity,
+```math
+P_{cap} = \gamma\kappa,
+```
+therefore surface tension times the curvature of the liquid vapor interface.
+This pressure induces a dynamic pressure which is resulting in a flow towards the neck, a Bernulli pressure if you want
+```math
+P_B = \rho u^2 = \rho \bigg(\frac{h_0}{t}\bigg)^2,
+```
+without being to specific about $t$ for now.
+
+Requiring both pressures are equal we have
+```math
+P_B = P_{cap} = \rho \bigg(\frac{h_0}{t}\bigg)^2 = \gamma\kappa = \frac{\gamma}{h_0}, 
+```
+where we assume that the radius of curvature is similar to the height of the bridge.
+Solving this for $h_0$ we get
+```math
+h_0 = \bigg(\frac{\gamma}{\rho}\bigg)^{1/3}t^{2/3},
+```
+which explains the $t^{2/3}$ powerlaw we were looking for.
+
+Now for the twin droplet case we have to work a bit.
+One crude but somewhat legite assumption is that the shape is constant.
+Meaning,
+```math
+\partial_t h = 0.
+```
+Thus the thin film equation becomes
+```math
+0 = \partial_x \bigg(\frac{h^3}{3\mu}\partial_x p + \frac{h^2}{2\mu}\partial_x\gamma\bigg).
+```
+In the next step we integrate both sides and have the seemingly simple equation
+```math
+0 = \frac{h^3}{3\mu}\partial_x p + \frac{h^2}{2\mu}\partial_x\gamma,
+```
+which we can solve straight for $p$
+```math
+\partial_x p = -\frac{3}{2 h}\partial_x\gamma.
+```
+Inserting the pressure we use for our numerical experiments we have,
+```math
+\partial_x[-\gamma\partial_x^2 h - \Pi(h)] = -\frac{3}{2 h}\partial_x\gamma,
+```
+and after some calculus
+```math
+-\partial_x\gamma\partial_x^2 h - \gamma\partial_x^3 h - \partial_x\Pi(h) = -\frac{3}{2 h}\partial_x\gamma.
+```
+For the disjoining pressure $\Pi(h)$ we use a seperation of variables, therefore
+```math
+\Pi(h) = K(\gamma)H(h),\quad K(\gamma)\propto \gamma(1-cos(\theta)), \quad H(h) \propto \bigg(\frac{h_{\ast}}{h}\bigg)^9 - \bigg(\frac{h_{\ast}}{h}\bigg)^3,
+```
+for which we can use 
+```math
+\partial_x K(\gamma) = \frac{K(\gamma)}{\gamma}\partial_x\gamma,\quad \partial_x H(h) = \partial_h H(h)\partial_x h.
+```
+Inserting these relation we have 
+```math
+-\partial_x\gamma\partial_x^2 h - \gamma\partial_x^3 h - \frac{K(\gamma)}{\gamma}\partial_x\gamma H(h) - K(\gamma)\partial_h H(h)\partial_x h= -\frac{3}{2 h}\partial_x\gamma.
+```
+Just keeping the $\partial_x^3 h$ term on the left hand side and collecting all $\partial_x\gamma$ terms
+```math
+- \gamma\partial_x^3 h = \bigg[-\frac{3}{2 h}\partial_x\gamma + \partial_x^2 h + H(h) \frac{K(\gamma)}{\gamma}\bigg]\partial_x\gamma + K(\gamma)\partial_h H(h)\partial_x h.
+```
+Solving this is possible but probably no fun.
+Instead lets try to get an understanding for the scaling and see which terms is of which order in $h$
+```math 
+O(h^{-9}) : \frac{K(\gamma)H(h)}{\gamma}\partial_x\gamma,\quad K(\gamma)\partial_hH(h)\partial_xh
+```
+```math
+O(h^{-1}) : -\frac{3}{2h}\partial_x\gamma
+```
+```math
+O(h) : \partial_x^2 h\partial_x\gamma, \quad -\gamma\partial_x^3 h 
+```
+"
+
+
+# ╔═╡ aa55506e-2328-484e-a4c7-915f6a08b8b8
+md"First, if disjoining pressure is neglected than only the $O(h^{-1})$ is considered, see Karpitschka and Riegler.
+If we however keep the disjoining pressure than we have two terms that scale with $O(h^{-9})$, which quite a large power.
+"
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -2089,5 +2148,7 @@ version = "0.9.1+5"
 # ╠═0e21314c-c763-48da-b1eb-73b4414cba23
 # ╟─3eb1f305-2773-47c6-8ee0-a662be6a7d83
 # ╠═91023ffe-3ffe-4ab9-a42a-b5cd299214a7
+# ╟─4b234890-fb88-4dab-a4e4-88fde788c423
+# ╟─aa55506e-2328-484e-a4c7-915f6a08b8b8
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
