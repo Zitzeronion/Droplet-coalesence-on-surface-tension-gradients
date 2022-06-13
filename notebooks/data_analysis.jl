@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.6
+# v0.19.8
 
 using Markdown
 using InteractiveUtils
@@ -478,7 +478,7 @@ Swalbe = "~1.0.1"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.7.2"
+julia_version = "1.7.3"
 manifest_format = "2.0"
 
 [[deps.AbstractFFTs]]
@@ -763,7 +763,7 @@ uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 version = "0.8.6"
 
 [[deps.Downloads]]
-deps = ["ArgTools", "LibCURL", "NetworkOptions"]
+deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 
 [[deps.DualNumbers]]
@@ -2138,9 +2138,9 @@ version = "0.9.1+5"
 # ╟─31982c37-8324-4b6e-9bbc-42b8594a90c9
 # ╠═7bd5733d-ec1a-4fad-a32b-86b295fbb93f
 # ╟─f9849f21-02db-4bc6-ac7c-c3470c4d9bf5
-# ╟─23623020-3992-499d-aba5-37488b92797f
+# ╠═23623020-3992-499d-aba5-37488b92797f
 # ╟─d0c30d75-4e53-401b-82ef-b974d6ad170b
-# ╟─5053ff78-1a91-4912-9360-ab6e1dbcff61
+# ╠═5053ff78-1a91-4912-9360-ab6e1dbcff61
 # ╟─fda64125-84cf-43cb-9fc9-40fff5144770
 # ╟─5a8e4fd7-4786-4ce4-b1ae-6a6ea645a3a0
 # ╟─9cd40341-6b0c-49f2-9371-ab03e42227d5

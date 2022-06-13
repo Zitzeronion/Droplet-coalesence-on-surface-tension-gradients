@@ -410,7 +410,7 @@ end
 
 Measurement of bridge height, neck position and skewness.
 """
-function bridge_height(; folder="Drop_coalescence_sign", gamma=1e-5, kind="periodic", T=[9990, 100000000], hmin=0.11, hc=0.03, slip=12, L=1024, r0=171, label_="step")
+function bridge_height(; folder="Drop_coalescence_sign", gamma=1e-5, kind="periodic", T=[9990, 100000000], hmin=0.11, hc=0.03, slip=12, L=1024, r0=250, label_="step")
 	df_ = DataFrame()
 	# Parameter
 	center = L÷2
@@ -439,9 +439,10 @@ function bridge_height(; folder="Drop_coalescence_sign", gamma=1e-5, kind="perio
 		for t in time_dict[i]
 			# Where the bridge should be
 			neck_region = df[!, Symbol("h_$(t)")][center-r0:center+r0]
+			my_min = argmin(neck_region) + center - r0
 			# The position of the two maxima, thus the droplets heighest points
-			pos_maxH_drop1 = argmax(df[!, Symbol("h_$(t)")][1:center]) 
-			pos_maxH_drop2 = argmax(df[!, Symbol("h_$(t)")][center+1:L]) + center + 1
+			pos_maxH_drop1 = argmax(df[!, Symbol("h_$(t)")][1:my_min]) 
+			pos_maxH_drop2 = argmax(df[!, Symbol("h_$(t)")][my_min+1:L]) + my_min + 1
 			# And the numerical value of the height of the two droplets
 			maxH_drop1 = df[!, Symbol("h_$(t)")][pos_maxH_drop1]
 			maxH_drop2 = df[!, Symbol("h_$(t)")][pos_maxH_drop2]
@@ -449,7 +450,7 @@ function bridge_height(; folder="Drop_coalescence_sign", gamma=1e-5, kind="perio
 			push!(time_list, t)
 			push!(grad_list, label_)
 			push!(min_list, minimum(neck_region))
-			push!(pos_min_list, argmin(neck_region))
+			push!(pos_min_list, argmin(neck_region) + center - r0)
 			push!(skew_list, myskew(neck_region))
 			push!(pos_drop1, pos_maxH_drop1)
 			push!(pos_drop2, pos_maxH_drop2)
