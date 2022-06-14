@@ -410,7 +410,7 @@ end
 
 Measurement of bridge height, neck position and skewness.
 """
-function bridge_height(; folder="Drop_coalescence_long", gamma=1e-5, kind="periodic", T=[9990, 100000000], hmin=0.11, hc=0.03, slip=12, L=1024, r0=250, label_="step")
+function bridge_height(; folder="Drop_coalescence_long", gamma=1e-5, kind="periodic", T=[9990, 100000000], hmin=0.11, hc=0.03, slip=12, L=1024, r0=210, label_="step")
 	df_ = DataFrame()
 	# Parameter
 	center = L÷2
@@ -463,7 +463,7 @@ function bridge_height(; folder="Drop_coalescence_long", gamma=1e-5, kind="perio
 		end
 	end
 	# Fill the dataframe with the results of the analysis
-	df_[!, "g(x)"] = grad_list
+	df_[!, "g_x"] = grad_list
 	df_[!, "time"] = time_list
 	df_[!, "bridge_min"] = min_list
 	df_[!, "neck_pos"] = pos_min_list

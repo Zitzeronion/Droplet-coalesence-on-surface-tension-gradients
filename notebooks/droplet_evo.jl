@@ -37,7 +37,10 @@ We expect that $h_d^r$ will decrease with time.
 md"First we read the data, simply clone the repo and load the .csv file."
 
 # ╔═╡ ef661fd9-e3c2-4fd3-a36b-75a43222155f
-coalescene_data = CSV.read("..\\data\\coalescence_data_slip_12_gamma0_1e-5_hmin_012.csv", DataFrame)
+coalescene_data = CSV.read("..\\data\\coalescence_data_slip_12_gamma0_1e-5_sim.csv", DataFrame)
+
+# ╔═╡ 0671ef84-5f84-4967-bf29-b3f9e83f9f08
+coalescene_data2 = CSV.read("..\\data\\coalescence_data_slip_12_gamma0_1e-5_hmin_012.csv", DataFrame)
 
 # ╔═╡ ee0a7ed7-9893-42f9-adfe-c23ff5315db0
 md"To this dataframe we add the newly computed 
@@ -49,6 +52,9 @@ field.
 
 # ╔═╡ fde19bfb-59ee-45bc-80e2-3c445ca18ce1
 coalescene_data[!, "drop_diff"] .= abs.(coalescene_data.height_droplet_left .- coalescene_data.height_droplet_right)
+
+# ╔═╡ 01a2f09d-fae0-4189-be7a-b530277726aa
+coalescene_data2[!, "drop_diff"] .= abs.(coalescene_data2.height_droplet_left .- coalescene_data2.height_droplet_right)
 
 # ╔═╡ d8f60516-34d7-4bd1-a330-d8a3becfc3e6
 function tau_ic(;ρ=1, r₀=171, γ=1e-5)
@@ -87,7 +93,7 @@ $(@bind l Slider(3:10))
 begin
 	i = 1
 	plot(@subset(coalescene_data, :g_x .== γ_names[i]).t_norm, #[log_t] 
-		@subset(coalescene_data, :g_x .== γ_names[i]).drop_diff, 
+		@subset(coalescene_data2, :g_x .== γ_names[i]).drop_diff, 
 				label=label_dict[γ_names[i]],
 				# st = :scatter,
 				l = (3, :solid),
@@ -118,10 +124,38 @@ begin
 	)
 end
 
+# ╔═╡ 8ffb2721-e939-45b0-8566-ad8c350a05b4
+@recipe function f(::Type{Val{:samplemarkers}}, x, y, z; step = 10)
+    n = length(y)
+    sx, sy = x[1:step:n], y[1:step:n]
+    # add an empty series with the correct type for legend markers
+    @series begin
+        seriestype := :path
+        markershape --> :auto
+        x := [Inf]
+        y := [Inf]
+    end
+    # add a series for the line
+    @series begin
+        primary := false # no legend entry
+        markershape := :none # ensure no markers
+        seriestype := :path
+        seriescolor := get(plotattributes, :seriescolor, :auto)
+        x := x
+        y := y
+    end
+    # return  a series for the sampled markers
+    primary := false
+    seriestype := :scatter
+    markershape --> :auto
+    x := sx
+    y := sy
+end
+
 # ╔═╡ 8707f1b4-8418-4ebc-99e1-b6aba22c25d2
 begin
 	plot(@subset(coalescene_data, :g_x .== γ_names[i]).t_norm, #[log_t] 
-		@subset(coalescene_data, :g_x .== γ_names[i]).drop_diff, 
+		@subset(coalescene_data2, :g_x .== γ_names[i]).drop_diff, 
 				label=label_dict[γ_names[i]],
 				# st = :scatter,
 				l = (3, :solid),
@@ -129,13 +163,23 @@ begin
 				xlabel = "t/τ",
 				legend = :topleft,
 				#yaxis = :log,
-				grid = false,
+				grid = false,				
+		      	st = :samplemarkers, 				# some recipy stuff
+		        step = 1000, 						# density of markers
+		        marker = (:circle, 8, 0.6, Plots.stroke(0, :gray)),	
 				legendfontsize = 12,		# legend font size
     			tickfontsize = 14,			# tick font and size
     			guidefontsize = 15,
-				# marker = (:circle, 8, 0.6, Plots.stroke(0, :gray)),
+				# ,
 				)
-	for k in 5:9
+	plot!(@subset(coalescene_data, :g_x .== γ_names[2]).t_norm, #[log_t] 
+			@subset(coalescene_data, :g_x .== γ_names[2]).drop_diff, 
+					label=label_dict[γ_names[2]],
+					l = (3, :dash),
+					# st = :scatter,
+					marker = (marker_dict[k-1], 8, 0.6, Plots.stroke(0, :gray)),
+		)
+	for k in 5:7
 		plot!(@subset(coalescene_data, :g_x .== γ_names[k]).t_norm, #[log_t] 
 			@subset(coalescene_data, :g_x .== γ_names[k]).drop_diff, 
 					label=label_dict[γ_names[k]],
@@ -144,9 +188,9 @@ begin
 					# marker = (marker_dict[k-1], 8, 0.6, Plots.stroke(0, :gray)),
 		)
 	end
-	plot!(@subset(coalescene_data, :g_x .== γ_names[10]).t_norm, #[log_t] 
-			@subset(coalescene_data, :g_x .== γ_names[10]).drop_diff, 
-					label=label_dict[γ_names[10]],
+	plot!(@subset(coalescene_data, :g_x .== γ_names[8]).t_norm, #[log_t] 
+			@subset(coalescene_data, :g_x .== γ_names[8]).drop_diff, 
+					label=label_dict[γ_names[8]],
 					l = (3, :auto),
 					# st = :scatter,
 					# marker = (marker_dict[k-1], 8, 0.6, Plots.stroke(0, :gray)),
@@ -1255,8 +1299,10 @@ version = "0.9.1+5"
 # ╠═50901b90-eb08-11ec-3087-81a949a22d5d
 # ╟─cb1d2d4f-5f05-4fe9-93db-973c9113cf67
 # ╠═ef661fd9-e3c2-4fd3-a36b-75a43222155f
+# ╠═0671ef84-5f84-4967-bf29-b3f9e83f9f08
 # ╟─ee0a7ed7-9893-42f9-adfe-c23ff5315db0
 # ╠═fde19bfb-59ee-45bc-80e2-3c445ca18ce1
+# ╠═01a2f09d-fae0-4189-be7a-b530277726aa
 # ╠═d8f60516-34d7-4bd1-a330-d8a3becfc3e6
 # ╠═b3c4efff-2b13-4602-8df7-80d35af4af68
 # ╟─d6451808-f53c-4e98-82ad-30a79e697120
@@ -1266,6 +1312,7 @@ version = "0.9.1+5"
 # ╠═e8c86e7f-5683-4493-a3f9-68bb945f4f26
 # ╠═b993564a-077d-47ed-b8b9-6548d2f0fbca
 # ╠═06f3cb7a-544a-4065-85d0-7ffe76cf5105
+# ╟─8ffb2721-e939-45b0-8566-ad8c350a05b4
 # ╠═8707f1b4-8418-4ebc-99e1-b6aba22c25d2
 # ╠═50a6e24b-eeb9-44bb-8dd2-1efece2d7643
 # ╟─edde35ab-d4fe-4fc2-b63f-c1d198df6b99

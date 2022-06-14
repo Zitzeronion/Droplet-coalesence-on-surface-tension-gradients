@@ -203,6 +203,9 @@ If for whatever reson someone want to analyse the with *Excel* it would be possi
 # ╔═╡ 7bd5733d-ec1a-4fad-a32b-86b295fbb93f
 coalescene_data = CSV.read("..\\data\\coalescence_data_slip_12_gamma0_1e-5_hmin_012.csv", DataFrame)
 
+# ╔═╡ 047ec01e-2d8f-44e6-a38b-df053f82eb67
+coalescene_data_hd = CSV.read("..\\data\\coalescence_data_slip_12_gamma0_1e-5_sim.csv", DataFrame)
+
 # ╔═╡ f9849f21-02db-4bc6-ac7c-c3470c4d9bf5
 md"## Data analysis
 
@@ -312,6 +315,18 @@ end
 
 # ╔═╡ 0e21314c-c763-48da-b1eb-73b4414cba23
 savefig(bridge_plot, "..\\figures\\bridge_evo.svg")
+
+# ╔═╡ fe2fe8ec-31af-4a22-878c-7230c6fa3e84
+md"This data tells us that the droplets nicely coalescing with a powerlaw of α=2/3, at least for a constant surface tension. 
+When we impose a gradient on the substrate the story is different.
+All but the blue circles deviate from the black line
+
+```math
+	f(t) = \beta\cdot t^{2/3},
+```
+
+where β=0.01. 
+"
 
 # ╔═╡ 3eb1f305-2773-47c6-8ee0-a662be6a7d83
 begin
@@ -2137,6 +2152,7 @@ version = "0.9.1+5"
 # ╟─1166c2dc-654d-4fc1-8697-8e135a288e05
 # ╟─31982c37-8324-4b6e-9bbc-42b8594a90c9
 # ╠═7bd5733d-ec1a-4fad-a32b-86b295fbb93f
+# ╠═047ec01e-2d8f-44e6-a38b-df053f82eb67
 # ╟─f9849f21-02db-4bc6-ac7c-c3470c4d9bf5
 # ╠═23623020-3992-499d-aba5-37488b92797f
 # ╟─d0c30d75-4e53-401b-82ef-b974d6ad170b
@@ -2146,6 +2162,7 @@ version = "0.9.1+5"
 # ╟─9cd40341-6b0c-49f2-9371-ab03e42227d5
 # ╠═4022cd85-8ecf-4781-9c02-66213b544203
 # ╠═0e21314c-c763-48da-b1eb-73b4414cba23
+# ╠═fe2fe8ec-31af-4a22-878c-7230c6fa3e84
 # ╟─3eb1f305-2773-47c6-8ee0-a662be6a7d83
 # ╠═91023ffe-3ffe-4ab9-a42a-b5cd299214a7
 # ╟─4b234890-fb88-4dab-a4e4-88fde788c423
