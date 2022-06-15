@@ -51,40 +51,56 @@ field.
 "
 
 # ╔═╡ fde19bfb-59ee-45bc-80e2-3c445ca18ce1
-coalescene_data[!, "drop_diff"] .= abs.(coalescene_data.height_droplet_left .- coalescene_data.height_droplet_right)
+begin
+	coalescene_data[!, "drop_diff"] .= abs.(coalescene_data.height_droplet_left .- coalescene_data.height_droplet_right)
+	coalescene_data2[!, "drop_diff"] .= abs.(coalescene_data2.height_droplet_left .- coalescene_data2.height_droplet_right)
+end
 
-# ╔═╡ 01a2f09d-fae0-4189-be7a-b530277726aa
-coalescene_data2[!, "drop_diff"] .= abs.(coalescene_data2.height_droplet_left .- coalescene_data2.height_droplet_right)
+# ╔═╡ 350b5fa7-6b92-4f7b-b23f-a65b201c036e
+md"Normalizing the lattice Boltzmann time steps we use the inertio capillary time scale.
+It is computed according to 
+```math
+\tau_{ic} = \sqrt{\frac{\rho R^{3}}{\gamma}},
+```
+with $R$ being the initial radius and $\rho$ being the density, which we set 1."
 
 # ╔═╡ d8f60516-34d7-4bd1-a330-d8a3becfc3e6
 function tau_ic(;ρ=1, r₀=171, γ=1e-5)
 	return sqrt(ρ*r₀^3/γ)
 end
 
+# ╔═╡ cc8ed16f-a3e2-4103-a03c-4414574f0921
+md"Using this factor we create a new column called `t_norm` which contains the normalized time."
+
 # ╔═╡ b3c4efff-2b13-4602-8df7-80d35af4af68
 coalescene_data.t_norm .= coalescene_data.time ./ tau_ic() 
 
 # ╔═╡ d6451808-f53c-4e98-82ad-30a79e697120
 md"Below is the list of names for the different surface tension gardients.
-On top a time set which looks reasonable spaced in loglog plots and does not collapse too much in the late simulation times." 
+On top a time set which looks reasonable spaced in loglog plots and does not collapse too much in the late simulation times.
+
+And so more convenience dicts to store things." 
 
 # ╔═╡ f184aa9f-2e04-4d22-b2fb-6f3297ea310e
-γ_names = ["const", "step", "tanh1", "tanh2", "tanh5","tanh10", "tanh20", "tanh50", "tanh100", "tanh200"]
-
-# ╔═╡ 93d48571-49c2-4d50-a280-3fb56da54f6d
-log_t = [1, 2, 3, 4, 6, 10, 20, 30, 40, 60, 100, 200, 300, 400, 600, 900, 1001, 1002, 1003, 1005, 1007, 1010, 1015, 1022, 1030, 1040, 1055, 1078, 1110, 1160, 1250, 1360, 1500, 1700, 2000, 2500, 3200, 4200, 5600, 7800, 10900]
-
-# ╔═╡ 69a83bbb-64e3-440b-b5fc-5de1750ae91b
-label_dict = Dict("const" => "γ=γ₀", "step" => "γ=Θ(x)", "tanh1" =>"γ=s(x;1)", "tanh2" =>"γ=s(x;2)", "tanh5" =>"γ=s(x;5)", "tanh10" =>"γ=s(x;10)", "tanh20" =>"γ=s(x;20)", "tanh50" =>"γ=s(x;50)", "tanh100" =>"γ=s(x;100)", "tanh200" =>"γ=s(x;200)")
-
-# ╔═╡ e8c86e7f-5683-4493-a3f9-68bb945f4f26
-marker_dict = Dict(1 => :d, 2 => :s, 3 => :r, 4 => :h, 5 => :star4, 6 => :ut, 7 => :dt, 8 => :p, 9 => :lt, 10 => :s, 2 => :s, 2 => :s, 2 => :s)
+begin
+	# Surface tension names
+	γ_names = ["const", "step", "tanh1", "tanh2", "tanh5","tanh10", "tanh20", "tanh50", "tanh100", "tanh200"]
+	# Good subset of times for loglog plots
+	log_t = [1, 2, 3, 4, 6, 10, 20, 30, 40, 60, 100, 200, 300, 400, 600, 900, 1001, 1002, 1003, 1005, 1007, 1010, 1015, 1022, 1030, 1040, 1055, 1078, 1110, 1160, 1250, 1360, 1500, 1700, 2000, 2500, 3200, 4200, 5600, 7800, 10900]
+	# Labels for the different surface tension gradients
+	label_dict = Dict("const" => "γ=γ₀", "step" => "γ=Θ(x)", "tanh1" =>"γ=s(x;1)", "tanh2" =>"γ=s(x;2)", "tanh5" =>"γ=s(x;5)", "tanh10" =>"γ=s(x;10)", "tanh20" =>"γ=s(x;20)", "tanh50" =>"γ=s(x;50)", "tanh100" =>"γ=s(x;100)", "tanh200" =>"γ=s(x;200)")
+	# Some markers
+	marker_dict = Dict(1 => :d, 2 => :s, 3 => :r, 4 => :h, 5 => :star4, 6 => :ut, 7 => :dt, 8 => :p, 9 => :lt, 10 => :s, 2 => :s, 2 => :s, 2 => :s)
+end
 
 # ╔═╡ b993564a-077d-47ed-b8b9-6548d2f0fbca
 md"""
 ## Interactive
 
-Let's play with some interactivity
+Now we can finally address the question on how $\Delta h$ changes based on the surface tension field.
+In the plot below we just use three different lines, the constant field, the step and a smoothed variant.
+
+The smoothing can be increased by moving the slider to the right
 
 $(@bind l Slider(3:10))
 """
@@ -123,6 +139,11 @@ begin
 				# marker = (marker_dict[l-1], 8, 0.6, Plots.stroke(0, :gray)),
 	)
 end
+
+# ╔═╡ 8c713445-d87a-47e2-a753-e6f6f4812a7a
+md"Having tested some smoothing widths and learned how they affect the droplets size we like to collect this results in a plot.
+In the plot we use a subset of smoothing widths and plot the evolution of the height difference.
+"
 
 # ╔═╡ 8ffb2721-e939-45b0-8566-ad8c350a05b4
 @recipe function f(::Type{Val{:samplemarkers}}, x, y, z; step = 10)
@@ -176,7 +197,8 @@ begin
 			@subset(coalescene_data, :g_x .== γ_names[2]).drop_diff, 
 					label=label_dict[γ_names[2]],
 					l = (3, :dash),
-					# st = :scatter,
+					st = :samplemarkers, 				# some recipy stuff
+		        	step = 1000,
 					marker = (marker_dict[k-1], 8, 0.6, Plots.stroke(0, :gray)),
 		)
 	for k in 5:7
@@ -184,18 +206,24 @@ begin
 			@subset(coalescene_data, :g_x .== γ_names[k]).drop_diff, 
 					label=label_dict[γ_names[k]],
 					l = (3, :auto),
+					st = :samplemarkers, 				# some recipy stuff
+		        	step = 1000,
 					# st = :scatter,
-					# marker = (marker_dict[k-1], 8, 0.6, Plots.stroke(0, :gray)),
+					marker = (marker_dict[k-1], 8, 0.6, Plots.stroke(0, :gray)),
 		)
 	end
 	plot!(@subset(coalescene_data, :g_x .== γ_names[8]).t_norm, #[log_t] 
 			@subset(coalescene_data, :g_x .== γ_names[8]).drop_diff, 
 					label=label_dict[γ_names[8]],
 					l = (3, :auto),
-					# st = :scatter,
-					# marker = (marker_dict[k-1], 8, 0.6, Plots.stroke(0, :gray)),
+					st = :samplemarkers, 				# some recipy stuff
+		        	step = 1000,
+					marker = (marker_dict[8], 8, 0.6, Plots.stroke(0, :gray)),
 		)
 end
+
+# ╔═╡ 8377837a-24b9-47ad-9777-1f9c89c32d41
+
 
 # ╔═╡ 50a6e24b-eeb9-44bb-8dd2-1efece2d7643
 begin
@@ -236,7 +264,7 @@ md"
 ### Other Fluids
 
 After this scientific journy into the world of droplets and their attraction let's end this notebook with something tasty.
-There is the delicious mixture of espresso and tonic water, called espresso tonic.
+There is this delicious mixture, called espresso tonic.
 Interested?
 
 Check out the video from James Hoffmann while I heat up the espresso machine.
@@ -1301,21 +1329,21 @@ version = "0.9.1+5"
 # ╠═ef661fd9-e3c2-4fd3-a36b-75a43222155f
 # ╠═0671ef84-5f84-4967-bf29-b3f9e83f9f08
 # ╟─ee0a7ed7-9893-42f9-adfe-c23ff5315db0
-# ╠═fde19bfb-59ee-45bc-80e2-3c445ca18ce1
-# ╠═01a2f09d-fae0-4189-be7a-b530277726aa
+# ╟─fde19bfb-59ee-45bc-80e2-3c445ca18ce1
+# ╟─350b5fa7-6b92-4f7b-b23f-a65b201c036e
 # ╠═d8f60516-34d7-4bd1-a330-d8a3becfc3e6
+# ╟─cc8ed16f-a3e2-4103-a03c-4414574f0921
 # ╠═b3c4efff-2b13-4602-8df7-80d35af4af68
-# ╟─d6451808-f53c-4e98-82ad-30a79e697120
+# ╠═d6451808-f53c-4e98-82ad-30a79e697120
 # ╠═f184aa9f-2e04-4d22-b2fb-6f3297ea310e
-# ╠═93d48571-49c2-4d50-a280-3fb56da54f6d
-# ╠═69a83bbb-64e3-440b-b5fc-5de1750ae91b
-# ╠═e8c86e7f-5683-4493-a3f9-68bb945f4f26
 # ╠═b993564a-077d-47ed-b8b9-6548d2f0fbca
-# ╠═06f3cb7a-544a-4065-85d0-7ffe76cf5105
+# ╟─06f3cb7a-544a-4065-85d0-7ffe76cf5105
+# ╠═8c713445-d87a-47e2-a753-e6f6f4812a7a
 # ╟─8ffb2721-e939-45b0-8566-ad8c350a05b4
 # ╠═8707f1b4-8418-4ebc-99e1-b6aba22c25d2
+# ╠═8377837a-24b9-47ad-9777-1f9c89c32d41
 # ╠═50a6e24b-eeb9-44bb-8dd2-1efece2d7643
-# ╟─edde35ab-d4fe-4fc2-b63f-c1d198df6b99
+# ╠═edde35ab-d4fe-4fc2-b63f-c1d198df6b99
 # ╟─1429de49-123c-4ce9-8713-b654379f61f5
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
