@@ -15,14 +15,16 @@ macro bind(def, element)
 end
 
 # ╔═╡ 50901b90-eb08-11ec-3087-81a949a22d5d
-using CSV, DataFrames, DataFramesMeta, Plots, PlutoUI
+using CSV, DataFrames, DataFramesMeta, Plots, PlutoUI, HTTP
 
 # ╔═╡ 7ed11bdd-2f22-44a5-94c2-8ef0d841769e
 md"# Flows and droplets
 
 Here we want to take a look at the evolution of the two maxima.
-If one droplet gets smaller than the other droplet should increase in size.
-We therefore are going to use the metric
+If a droplet gets smaller than the other one should increase in size.
+Measuring this is not as trivial as trivial as one expects.
+Because the geometry is not a circular section all the time.
+To make things simple we are going to use the metric
 
 ```math
 	\Delta h = h_d^l - h_d^r
@@ -37,10 +39,12 @@ We expect that $h_d^r$ will decrease with time.
 md"First we read the data, simply clone the repo and load the .csv file."
 
 # ╔═╡ ef661fd9-e3c2-4fd3-a36b-75a43222155f
-coalescene_data = CSV.read("..\\data\\coalescence_data_slip_12_gamma0_1e-5_sim.csv", DataFrame)
+#coalescene_data = CSV.read("..\\data\\coalescence_data_slip_12_gamma0_1e-5_sim.csv", DataFrame)
+coalescene_data = CSV.read(HTTP.get("https://raw.githubusercontent.com/Zitzeronion/TimeDepWettabilityPaper/Drop_coalescence/Data_CSV/coalescence_data_slip_12_gamma0_1e-5_sim.csv").body, DataFrame)
 
 # ╔═╡ 0671ef84-5f84-4967-bf29-b3f9e83f9f08
-coalescene_data2 = CSV.read("..\\data\\coalescence_data_slip_12_gamma0_1e-5_hmin_012.csv", DataFrame)
+#coalescene_data2 = CSV.read("..\\data\\coalescence_data_slip_12_gamma0_1e-5_hmin_012.csv", DataFrame)
+coalescene_data2 = CSV.read(HTTP.get("https://raw.githubusercontent.com/Zitzeronion/TimeDepWettabilityPaper/Drop_coalescence/Data_CSV/coalescence_data_slip_12_gamma0_1e-5_hmin_012.csv").body, DataFrame)
 
 # ╔═╡ ee0a7ed7-9893-42f9-adfe-c23ff5315db0
 md"To this dataframe we add the newly computed 
@@ -175,7 +179,7 @@ end
 
 # ╔═╡ 8707f1b4-8418-4ebc-99e1-b6aba22c25d2
 begin
-	plot(@subset(coalescene_data, :g_x .== γ_names[i]).t_norm, #[log_t] 
+	hdiff = plot(@subset(coalescene_data, :g_x .== γ_names[i]).t_norm, #[log_t] 
 		@subset(coalescene_data2, :g_x .== γ_names[i]).drop_diff, 
 				label=label_dict[γ_names[i]],
 				# st = :scatter,
@@ -183,7 +187,7 @@ begin
 				ylabel = "Δh", 
 				xlabel = "t/τ",
 				legend = :topleft,
-				#yaxis = :log,
+				# yaxis = :log,
 				grid = false,				
 		      	st = :samplemarkers, 				# some recipy stuff
 		        step = 1000, 						# density of markers
@@ -219,11 +223,13 @@ begin
 					st = :samplemarkers, 				# some recipy stuff
 		        	step = 1000,
 					marker = (marker_dict[8], 8, 0.6, Plots.stroke(0, :gray)),
+					# ylims=(1e-3, 100)
 		)
 end
 
 # ╔═╡ 8377837a-24b9-47ad-9777-1f9c89c32d41
-
+# pwd()
+# savefig(hdiff, "..\\figures\\hdiff.svg")
 
 # ╔═╡ 50a6e24b-eeb9-44bb-8dd2-1efece2d7643
 begin
@@ -283,6 +289,7 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DataFramesMeta = "1313f7d8-7da2-5740-9ea0-a2ca25f37964"
+HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 
@@ -290,6 +297,7 @@ PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 CSV = "~0.10.4"
 DataFrames = "~1.3.4"
 DataFramesMeta = "~0.11.0"
+HTTP = "~0.9.17"
 Plots = "~1.29.1"
 PlutoUI = "~0.7.39"
 """
@@ -1323,7 +1331,7 @@ version = "0.9.1+5"
 """
 
 # ╔═╡ Cell order:
-# ╠═7ed11bdd-2f22-44a5-94c2-8ef0d841769e
+# ╟─7ed11bdd-2f22-44a5-94c2-8ef0d841769e
 # ╠═50901b90-eb08-11ec-3087-81a949a22d5d
 # ╟─cb1d2d4f-5f05-4fe9-93db-973c9113cf67
 # ╠═ef661fd9-e3c2-4fd3-a36b-75a43222155f
@@ -1331,14 +1339,14 @@ version = "0.9.1+5"
 # ╟─ee0a7ed7-9893-42f9-adfe-c23ff5315db0
 # ╟─fde19bfb-59ee-45bc-80e2-3c445ca18ce1
 # ╟─350b5fa7-6b92-4f7b-b23f-a65b201c036e
-# ╠═d8f60516-34d7-4bd1-a330-d8a3becfc3e6
+# ╟─d8f60516-34d7-4bd1-a330-d8a3becfc3e6
 # ╟─cc8ed16f-a3e2-4103-a03c-4414574f0921
 # ╠═b3c4efff-2b13-4602-8df7-80d35af4af68
-# ╠═d6451808-f53c-4e98-82ad-30a79e697120
+# ╟─d6451808-f53c-4e98-82ad-30a79e697120
 # ╠═f184aa9f-2e04-4d22-b2fb-6f3297ea310e
-# ╠═b993564a-077d-47ed-b8b9-6548d2f0fbca
+# ╟─b993564a-077d-47ed-b8b9-6548d2f0fbca
 # ╟─06f3cb7a-544a-4065-85d0-7ffe76cf5105
-# ╠═8c713445-d87a-47e2-a753-e6f6f4812a7a
+# ╟─8c713445-d87a-47e2-a753-e6f6f4812a7a
 # ╟─8ffb2721-e939-45b0-8566-ad8c350a05b4
 # ╠═8707f1b4-8418-4ebc-99e1-b6aba22c25d2
 # ╠═8377837a-24b9-47ad-9777-1f9c89c32d41
