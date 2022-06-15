@@ -231,6 +231,59 @@ end
 # pwd()
 # savefig(hdiff, "..\\figures\\hdiff.svg")
 
+# ╔═╡ 42dc5c99-1980-421e-b993-2ea92e6fde5c
+md"### Separation time
+
+One further question we can ask the data is when the droplets separate.
+The separation can be defined using
+```math
+	\min_t(h_0) \leq h_{\ast},
+```
+meaning when $h_0(t) \leq h_{\ast}$ we assume the droplets are separated by an *dry* spot. 
+"
+
+# ╔═╡ 0c175894-a5dd-4844-af32-e24a2d1dc03a
+begin
+	sep_time = Float64[]
+	gamma_n = Int[]
+	for i in γ_names[3:end]
+		one_gamma = @subset(coalescene_data, :g_x .== i)
+		if minimum(one_gamma.bridge_min) < 0.09
+			# println("Hello, $i")
+			push!(sep_time, first(one_gamma[one_gamma.bridge_min .≤ 0.09, :t_norm]))
+		else
+			push!(sep_time, 200)
+		end
+		# println(first(one_gamma[one_gamma.bridge_min .≤ 0.09, :t_norm]))
+		# println(i[5:end])
+		push!(gamma_n, parse(Int, i[5:end]))
+	end
+end
+
+# ╔═╡ a2ed13b5-84db-4f02-bd6d-39f39ba5642c
+begin
+	plot(gamma_n[1:5], sep_time[1:5],
+		st = :scatter,
+		xlabel = "smoothing",
+		ylabel = "separation time",
+		grid=:false,
+		label="τₛ",
+		m = (:circle, 8),
+		# xaxis = :log,
+		legend=:topleft,
+		xlims=(0,22),
+		ylims=(0,80),
+		)
+	data_x = collect(0:0.1:30)
+	plot!(data_x, data_x .* 3, l=(3, :dash, :black), label="f(x)=3w")
+end
+
+# ╔═╡ 1777c3d2-6a65-4524-a3d6-5c4d785284d1
+# ╠═╡ disabled = true
+#=╠═╡
+coalescene_data[(coalescene_data.g_x .== "tanh2") .& (coalescene_data.t_norm .> 2.5), [:bridge_min, :t_norm]]
+  ╠═╡ =#
+
 # ╔═╡ 50a6e24b-eeb9-44bb-8dd2-1efece2d7643
 begin
 	plot(@subset(coalescene_data, :g_x .== γ_names[9]).t_norm, #[log_t] 
@@ -1350,6 +1403,10 @@ version = "0.9.1+5"
 # ╟─8ffb2721-e939-45b0-8566-ad8c350a05b4
 # ╠═8707f1b4-8418-4ebc-99e1-b6aba22c25d2
 # ╠═8377837a-24b9-47ad-9777-1f9c89c32d41
+# ╠═42dc5c99-1980-421e-b993-2ea92e6fde5c
+# ╠═0c175894-a5dd-4844-af32-e24a2d1dc03a
+# ╠═a2ed13b5-84db-4f02-bd6d-39f39ba5642c
+# ╠═1777c3d2-6a65-4524-a3d6-5c4d785284d1
 # ╠═50a6e24b-eeb9-44bb-8dd2-1efece2d7643
 # ╠═edde35ab-d4fe-4fc2-b63f-c1d198df6b99
 # ╟─1429de49-123c-4ce9-8713-b654379f61f5
