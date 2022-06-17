@@ -262,21 +262,30 @@ end
 
 # ╔═╡ a2ed13b5-84db-4f02-bd6d-39f39ba5642c
 begin
-	plot(gamma_n[1:5], sep_time[1:5],
+	using Base.Iterators: cycle, take
+	tau_sep = plot(gamma_n[1:5] ./ 171, sep_time[1:5],
 		st = :scatter,
-		xlabel = "smoothing",
-		ylabel = "separation time",
+		xlabel = "w/R₀",
+		ylabel = "t/τ",
 		grid=:false,
 		label="τₛ",
-		m = (:circle, 8),
-		# xaxis = :log,
+		marker = (:circle, 8, 0.6, Plots.stroke(0, :gray)),
+		legendfontsize = 12,		# legend font size
+    	tickfontsize = 14,			# tick font and size
+    	guidefontsize = 15,
 		legend=:topleft,
-		xlims=(0,22),
+		xlims=(0,0.13),
 		ylims=(0,80),
 		)
-	data_x = collect(0:0.1:30)
-	plot!(data_x, data_x .* 3, l=(3, :dash, :black), label="f(x)=3w")
+	# data_x = collect(0:0.1:30)
+	# plot!(data_x ./ 171, data_x.^2 ./ 5 , l=(3, :dash, :black), label="f(x)=3w")
 end
+
+# ╔═╡ ba644615-6717-4598-81cc-b8484e5f4855
+savefig(tau_sep, "..\\figures\\hdiff.svg")
+
+# ╔═╡ 5dd6ec7f-9766-4cf0-98c7-9c6c39f8bdb5
+
 
 # ╔═╡ 1777c3d2-6a65-4524-a3d6-5c4d785284d1
 # ╠═╡ disabled = true
@@ -1406,6 +1415,8 @@ version = "0.9.1+5"
 # ╠═42dc5c99-1980-421e-b993-2ea92e6fde5c
 # ╠═0c175894-a5dd-4844-af32-e24a2d1dc03a
 # ╠═a2ed13b5-84db-4f02-bd6d-39f39ba5642c
+# ╠═ba644615-6717-4598-81cc-b8484e5f4855
+# ╠═5dd6ec7f-9766-4cf0-98c7-9c6c39f8bdb5
 # ╠═1777c3d2-6a65-4524-a3d6-5c4d785284d1
 # ╠═50a6e24b-eeb9-44bb-8dd2-1efece2d7643
 # ╠═edde35ab-d4fe-4fc2-b63f-c1d198df6b99
