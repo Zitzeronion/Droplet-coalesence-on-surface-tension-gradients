@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.8
+# v0.19.9
 
 using Markdown
 using InteractiveUtils
@@ -282,10 +282,7 @@ begin
 end
 
 # ╔═╡ ba644615-6717-4598-81cc-b8484e5f4855
-savefig(tau_sep, "..\\figures\\hdiff.svg")
-
-# ╔═╡ 5dd6ec7f-9766-4cf0-98c7-9c6c39f8bdb5
-
+# savefig(tau_sep, "..\\figures\\hdiff.svg")
 
 # ╔═╡ 1777c3d2-6a65-4524-a3d6-5c4d785284d1
 # ╠═╡ disabled = true
@@ -1401,7 +1398,7 @@ version = "0.9.1+5"
 # ╟─ee0a7ed7-9893-42f9-adfe-c23ff5315db0
 # ╟─fde19bfb-59ee-45bc-80e2-3c445ca18ce1
 # ╟─350b5fa7-6b92-4f7b-b23f-a65b201c036e
-# ╟─d8f60516-34d7-4bd1-a330-d8a3becfc3e6
+# ╠═d8f60516-34d7-4bd1-a330-d8a3becfc3e6
 # ╟─cc8ed16f-a3e2-4103-a03c-4414574f0921
 # ╠═b3c4efff-2b13-4602-8df7-80d35af4af68
 # ╟─d6451808-f53c-4e98-82ad-30a79e697120
@@ -1416,7 +1413,6 @@ version = "0.9.1+5"
 # ╠═0c175894-a5dd-4844-af32-e24a2d1dc03a
 # ╠═a2ed13b5-84db-4f02-bd6d-39f39ba5642c
 # ╠═ba644615-6717-4598-81cc-b8484e5f4855
-# ╠═5dd6ec7f-9766-4cf0-98c7-9c6c39f8bdb5
 # ╠═1777c3d2-6a65-4524-a3d6-5c4d785284d1
 # ╠═50a6e24b-eeb9-44bb-8dd2-1efece2d7643
 # ╠═edde35ab-d4fe-4fc2-b63f-c1d198df6b99
