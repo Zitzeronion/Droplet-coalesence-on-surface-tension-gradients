@@ -389,19 +389,52 @@ Resulting in a new equilibrium shape where $\partial_x\gamma = 0$.
 This is expected because $\partial_x\gamma\neq 0$ induces a force which results in a flow, see Eq.~(\ref{eq:thin_with_marangoni}).
 
 Smoothing out the surface tension gradient using Eq.~(\ref{eq:gamma_tanh}) is shown by the remaining symbols in Fig~\ref{fig:bridge_growth}.
-Instead of an immediate separation of the droplets and independent of the smoothing width (different colors and symbols), the bridge starts to grow initially.
-More surprisingly, the data is in agreement with the powerlaw $\propto t^{2/3}$ of Eq.~(\ref{eq:coal_powerlaw}).
-The reason behind this flow is surface tension difference, the droplet on the higher surface tension side is sucking out fluid from the lower surface tension one.
+Instead of an immediate separation of the droplets and independent of the smoothing width Eq.~(\ref{eq:smoothing}) (different colors and symbols), the bridge starts to grow initially.
+More surprisingly, the growth rate is in agreement with the powerlaw $\propto t^{2/3}$ of Eq.~(\ref{eq:coal_powerlaw}).
+We observe that the droplet on the higher surface tension side is sucking fluid out from the lower surface tension one.
+This is in agreement with a Marangoni flow and explained in ref~\cite{PhysRevLett.109.066103}.
+The subtle difference in our setup is, that the twin droplet system is not supported by a constant velocity.
+Instead, we solely rely on the balance between the disjoining pressure and the surface tension gradient.
+Given that the system has one global energy minimum, which a single droplet on the high surface tension side.
+A local energy minimum is however found when the droplets separate.
+This can be seen in Fig.~\ref{fig:bridge_growth} when the symbols start to deviate from the dashed line.
+The $h_0(t)$ reaches a maximum and decreases rapidly to $h_0(t) \approx h_{\ast}$.
+An effect that can not be explained without considering the disjoining pressure Eq.~(\ref{eq:disjoin}) and the resulting flow Eq.~(\ref{eq:OronPlus}) in which $\pi(h)$ changes it's sign with increasing $h$.
+Interestingly, the separation time scale is $\gamma(x)$ dependent.
 
-\subsection{Asymmetry}\label{subsec:skewness}
+\subsection{Droplet separation}\label{subsec:separation}
+% In Fig.~\ref{fig:bridge_growth} at some point all data diverges from the powerlaw Eq.~(\ref{eq:coal_powerlaw}).
+The evolution of the bridge and therefore the flow is highly sensitive to the surface tension $\gamma(x)$, see Fig~\ref{fig:bridge_growth}.
+Choosing a constant surface tension $\gamma(x) = \gamma_0$, almost all data is in agreement with $\propto t^{2/3}$.
+Given Eqs.~(\ref{eq:gamma_step}-\ref{eq:gamma_tanh}) the less smeared the transition in the surface tension is, the sooner the bridges can't be explained using the powerlaw.
+Turning the argument around, the more space the transition between $\gamma_0$ and $\gamma_0-\Delta\gamma$ can occupy, the longer it takes the system to deviate from the fit.
+Two things are happening here, first being that the bridge is moving.
+The point of minimal thickness between the droplets shifts its location towards smaller surface tension.
+In agreement with the smearing ar
+As fluid is moving into the droplet with higher surface tension a volume depleation of the lower is.
+Measuring the maximal height $h_d$ for the left and right droplet over time we have an understanding of how much mass is transported, see Fig.~\ref{fig:drop_diff}. 
+The quantity $\Delta h$ is the absolute value of this difference,
+\begin{equation}\label{eq:drop_diff_h}
+    \Delta h = |h_{d,1} - h_{d,2}|
+\end{equation}
+
+Due to our setup with a time independent surface tension, the coordinate of $h_0(t)$ slightly moves towards a region of lower surface tension.
+This behavior is consistent up to the point when $w \geq R_0$. 
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=0.48\textwidth]{Figures/skew_evo.pdf}
+%     \caption{Skewenss $\mu_3$ displayed during the time evolution for various surface tension gradients.}
+%     \label{fig:skewness}
+% \end{figure}
 \begin{figure}
     \centering
-    \includegraphics[width=0.48\textwidth]{Figures/skew_evo.pdf}
-    \caption{Skewenss $\mu_3$ displayed during the time evolution for various surface tension gradients.}
-    \label{fig:skewness}
+    \includegraphics[width=0.48\textwidth]{Figures/hdiff.pdf}
+    \caption{Difference between the maxima of the two droplets over time.
+    T
+    Different symbols and colors depict different $\gamma(x)$'s.}
+    \label{fig:drop_diff}
 \end{figure}
-
-... see Fig.~\ref{fig:skewness}
 
 \section{Summary and Conclusions}\label{sec:sum_conclu}
 We have performed numerical simulations of coalescing droplets on a rigid substrate based on the thin film equation.
