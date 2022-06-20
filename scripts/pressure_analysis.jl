@@ -69,71 +69,48 @@ for i in ["tanh5", "tanh100"]
     gif(drops, "figures\\pressures_$(i).gif")
 end
 
+pressure_data = zeros(172, 3, 3, 2)
+p_df = DataFrame()
+plist = Float64[]
+gnlist = String[]
+pkind = String[]
+tilist = Int64[]
+for i in enumerate(["step", "tanh5", "tanh100"])
+    gname = fill(i[2], 172)
+    p_d = zeros(343)
+    for n in enumerate(["lap", "disj"])
+        pname = fill(n[2], 172)
+        df_ = read_Data(p=n[2], grad=i[2])
+    
+        if i[2] == "step"
+            gamma = step_gamma()
+        else
+            gamma = tanh_gamma(sl=parse(Int, i[2][5:end]))
+        end
+        for j in enumerate([10000,1000000,100000000])
+            tname = fill(j[2], 172)
+            p_d .= df_[!, Symbol("$(n[2])_$(j[2])")][512-171:512+171]
+            calc .= p_d ./ (gamma[512-171:512+171] ./ 171)
+            p_d .= calc
+            pressure_data[:, i[1], j[1], n[1]] .= p_d[1:2:end]
+            for l in 1:172
+                push!(tilist, tname[l])
+                push!(gnlist, gname[l])
+                push!(plist, pressure_data[l, i[1], j[1], n[1]])
+                push!(pkind, pname[l])
+            end
+        end
+    end
+end
+p_df[!, "pressure"] = plist
+p_df[!, "kind"] = pkind
+p_df[!, "gamma"] = gnlist
+p_df[!, "time"] = tilist
+
+CSV.write("data\\pressure_data.csv", p_df)
+
 # Figure for publication
 function tau_ic(;ρ=1, r₀=171, γ=1e-5)
 	return sqrt(ρ*r₀^3/γ)
 end
 
-p_list = Float64[]
-gamma_l = String[]
-kind_l = String[]
-time_l = Int64[]
-time_n = Float64[]
-
-for i in enumerate(["step", "tanh5", "tanh100"])
-    df_l = read_Data(p="lap", grad=i[2])
-    df_pi = read_Data(p="disj", grad=i[2])
-    if i[2] == "step"
-        gamma = step_gamma()
-    else
-        gamma = tanh_gamma(sl=parse(Int, i[2][5:end]))
-    end
-    
-    # c_ = [palette(:default)[1], palette(:default)[2], palette(:default)[3]]
-    for j in enumerate([100000, 1000000, 10000000])
-        for k in [df_l, df_pi]
-            if k == df_l
-                kind = "lap"
-            else
-                kind = "disj"
-            end
-            data[:, 1] .= k[!, Symbol("$(kind)_$(j[2])")][512-171:512+171]
-            # data[:, 2] .= df_pi[!, Symbol("disj_$(j[2])")][512-171:512+171]
-            calc .= data[:, 1] ./ (gamma[512-171:512+171] ./ 171)
-            data[:, 1] .= calc
-            # calc .= data[:, 2] ./ (gamma[512-171:512+171] ./ 171)
-            # data[:, 2] .= calc
-            for u in data[:, 1]
-                push!(p_list, u)
-                push!(gamma_l, i[2])
-                push!(kind_l, kind)
-                push!(time_l, j[2])
-                push!(time_n, j[2]/tau_ic())
-            end
-        end
-        #=
-        xax = collect(-171:171) ./ 171
-        plot!(xax, data[1:2:end, 1], 
-            label="∂h/∂ₓ",
-            l=(3, :solid, c_[j[1]]), 
-            xlabel="x/R_0",
-            ylabel="p/P") 
-        plot!(xax, data[1:2:end, 2], l=(3, :dash, c_[j[1]]), label="Π")  
-        =#
-    end
-    # savefig(p_dist, "figures\\pressures_dists_$(i[2]).svg")
-end
-
-df = DataFrame()
-df[!, "P_value"] = p_list
-df[!, "gamma"] = gamma_l
-df[!, "kind"] = kind_l
-df[!, "time"] = time_l
-df[!, "time_n"] = time_n
-# savefig(p_dist, "figures\\pressures_dists.svg")
-
-function pressures(df; gamma="step", kind="lap", time=100000)
-    return df[(df.gamma .== gamma) .& (df.kind .== kind) .& (df.time .== time), :P_value] 
-end
-R = 171
-plot(collect(-R:R) ./ R, pressures(df, kind="disj", time=10000000))
