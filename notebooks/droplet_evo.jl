@@ -240,6 +240,13 @@ The separation can be defined using
 	\min_t(h_0) \leq h_{\ast},
 ```
 meaning when $h_0(t) \leq h_{\ast}$ we assume the droplets are separated by an *dry* spot. 
+
+This only happens for a few of our simulations, in fact only for $w<50$.
+What we know so far is when the dip of the bridge starts to build up.
+But that dip is correlated with the separation time.
+However because set a maximal simulation time, we do not observe every separation. 
+On the other hand, for large values of $w > 50$ it is more likely that the other droplet is just eaten up.
+That is why the plot only shows a subset of smearing widths.
 "
 
 # ╔═╡ 0c175894-a5dd-4844-af32-e24a2d1dc03a
@@ -277,12 +284,88 @@ begin
 		xlims=(0,0.13),
 		ylims=(0,80),
 		)
-	# data_x = collect(0:0.1:30)
-	# plot!(data_x ./ 171, data_x.^2 ./ 5 , l=(3, :dash, :black), label="f(x)=3w")
+	data_x = collect(0:0.001:1)
+	plot!(data_x , data_x .* 500, l=(3, :dash, :black), label="f(x)=3w")
 end
 
 # ╔═╡ ba644615-6717-4598-81cc-b8484e5f4855
 # savefig(tau_sep, "..\\figures\\hdiff.svg")
+
+# ╔═╡ e6a1d40d-3ae1-4608-9788-e6a149d8f283
+md"What is interesting in this plot is the linear depenedency on the smearing width.
+
+We can use some function
+```math
+	y(w) = k\cdot w + w_0
+```
+where $k$ is a factor for the slope and $x_0$ is an offset.
+Clearly the offset is small, so $w_0 = 0$ for now.
+More interesting is the slope.
+For now I have no understanding why the slope takes the value it has.
+Problem for Stefan after the reviews.
+
+### Pressures
+
+One last thing that we are looking into is the distribution of the pressures.
+The pressure is something similar to 
+
+```math
+	p = \gamma(\Delta h - \Pi(h)),
+```
+therefore a second derivative of the height with an additional disjoining pressure component.
+One natural unit of pressure for the coalescence is
+
+```math
+	p_c = \frac{\gamma}{R},
+```
+often called capillary pressure.
+
+In the following we take a look at a subset of simulations where we measured the pressures and compare them to the capillary pressure.
+"
+
+# ╔═╡ ff16591c-26a8-4330-96d8-dd807b5bc9fb
+pressure_data = CSV.read("..\\data\\pressure_data.csv", DataFrame)
+
+# ╔═╡ 7a244fc8-a74d-4e12-892e-570cef474bca
+begin
+	xaxis = -171:2:171 
+	pressure_plot = plot()
+	# for i in [10000, 1000000, 100000000]
+	ci = [palette(:default)[1], palette(:default)[2], palette(:default)[3]] 
+	for i in enumerate(["step", "tanh5", "tanh100"])
+		plot!(xaxis ./171, 
+			pressure_data[(pressure_data.kind .== "lap") .& (pressure_data.time .== 100000000) .& (pressure_data.gamma .== i[2]), :pressure],
+			l=(3, :solid, ci[i[1]]),
+			label="$(label_dict[i[2]])",
+			xlabel="l/R",
+			ylabel="P/p₀",
+			st = :samplemarkers, 				# some recipy stuff
+			step = 11, 
+			marker = (:circle, 8, 0.6, Plots.stroke(0, :gray), ci[i[1]]),
+			legendfontsize = 12,		# legend font size
+	    	tickfontsize = 14,			# tick font and size
+	    	guidefontsize = 15,
+			legend=:bottomleft,
+			grid=false,
+		)
+		plot!(xaxis ./171, 
+			pressure_data[(pressure_data.kind .== "disj") .& (pressure_data.time .== 100000000) .& (pressure_data.gamma .== i[2]), :pressure],
+			l=(3, :dash, ci[i[1]]),
+			label="",
+			st = :samplemarkers, 				# some recipy stuff
+			step = 11, 
+			marker = (:star, 8, 0.6, Plots.stroke(0, :gray), ci[i[1]]),
+		)
+	end
+	# lens!([-0.15,0.85], [-1.5, 1.5], inset = (1, bbox(0.1, 0.2, 0.4, 0.4)))
+	plot!(xlims=(-0.85, 0.65))
+end
+
+# ╔═╡ 94a0e918-53e0-4348-b577-f331ea211cfa
+lens!([-0.15,0.85], [-1.5, 1.5], grid=false, inset = (1, bbox(0.1, 0.2, 0.4, 0.4)))
+
+# ╔═╡ a30ea74e-3614-4eb8-91f4-5d89a0f2f73c
+savefig("..\\Figures\\pressures_diff_gam.svg")
 
 # ╔═╡ 1777c3d2-6a65-4524-a3d6-5c4d785284d1
 # ╠═╡ disabled = true
@@ -291,6 +374,8 @@ coalescene_data[(coalescene_data.g_x .== "tanh2") .& (coalescene_data.t_norm .> 
   ╠═╡ =#
 
 # ╔═╡ 50a6e24b-eeb9-44bb-8dd2-1efece2d7643
+# ╠═╡ disabled = true
+#=╠═╡
 begin
 	plot(@subset(coalescene_data, :g_x .== γ_names[9]).t_norm, #[log_t] 
 		@subset(coalescene_data, :g_x .== γ_names[9]).position_maximum_right, 
@@ -323,6 +408,7 @@ begin
 				# marker = (:circle, 8, 0.6, Plots.stroke(0, :gray)),
 				)
 end
+  ╠═╡ =#
 
 # ╔═╡ edde35ab-d4fe-4fc2-b63f-c1d198df6b99
 md"
@@ -1408,11 +1494,16 @@ version = "0.9.1+5"
 # ╟─8c713445-d87a-47e2-a753-e6f6f4812a7a
 # ╟─8ffb2721-e939-45b0-8566-ad8c350a05b4
 # ╠═8707f1b4-8418-4ebc-99e1-b6aba22c25d2
-# ╠═8377837a-24b9-47ad-9777-1f9c89c32d41
-# ╠═42dc5c99-1980-421e-b993-2ea92e6fde5c
-# ╠═0c175894-a5dd-4844-af32-e24a2d1dc03a
+# ╟─8377837a-24b9-47ad-9777-1f9c89c32d41
+# ╟─42dc5c99-1980-421e-b993-2ea92e6fde5c
+# ╟─0c175894-a5dd-4844-af32-e24a2d1dc03a
 # ╠═a2ed13b5-84db-4f02-bd6d-39f39ba5642c
-# ╠═ba644615-6717-4598-81cc-b8484e5f4855
+# ╟─ba644615-6717-4598-81cc-b8484e5f4855
+# ╟─e6a1d40d-3ae1-4608-9788-e6a149d8f283
+# ╠═ff16591c-26a8-4330-96d8-dd807b5bc9fb
+# ╠═7a244fc8-a74d-4e12-892e-570cef474bca
+# ╠═94a0e918-53e0-4348-b577-f331ea211cfa
+# ╠═a30ea74e-3614-4eb8-91f4-5d89a0f2f73c
 # ╠═1777c3d2-6a65-4524-a3d6-5c4d785284d1
 # ╠═50a6e24b-eeb9-44bb-8dd2-1efece2d7643
 # ╠═edde35ab-d4fe-4fc2-b63f-c1d198df6b99
