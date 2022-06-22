@@ -15,7 +15,7 @@ macro bind(def, element)
 end
 
 # ╔═╡ 50901b90-eb08-11ec-3087-81a949a22d5d
-using CSV, DataFrames, DataFramesMeta, Plots, PlutoUI, HTTP
+using CSV, DataFrames, DataFramesMeta, Plots, PlutoUI, HTTP, FileIO, JLD2
 
 # ╔═╡ 7ed11bdd-2f22-44a5-94c2-8ef0d841769e
 md"# Flows and droplets
@@ -365,50 +365,60 @@ end
 lens!([-0.15,0.85], [-1.5, 1.5], grid=false, inset = (1, bbox(0.1, 0.2, 0.4, 0.4)))
 
 # ╔═╡ a30ea74e-3614-4eb8-91f4-5d89a0f2f73c
-savefig("..\\Figures\\pressures_diff_gam.svg")
+# savefig("..\\Figures\\pressures_diff_gam.svg")
 
-# ╔═╡ 1777c3d2-6a65-4524-a3d6-5c4d785284d1
-# ╠═╡ disabled = true
-#=╠═╡
-coalescene_data[(coalescene_data.g_x .== "tanh2") .& (coalescene_data.t_norm .> 2.5), [:bridge_min, :t_norm]]
-  ╠═╡ =#
+# ╔═╡ d3e3929c-97e5-4635-ad25-54ea87c24c82
+md"## Interfaces
 
-# ╔═╡ 50a6e24b-eeb9-44bb-8dd2-1efece2d7643
-# ╠═╡ disabled = true
-#=╠═╡
+With all the data it is actually helpful to take a look at the fluid-vapor interface.
+We know there is about three different scenarios
+- Coalescence
+- Separation
+- Asymmetric coalescence
+" 
+
+# ╔═╡ 4eb19849-a429-4a69-a382-f4e04e706105
 begin
-	plot(@subset(coalescene_data, :g_x .== γ_names[9]).t_norm, #[log_t] 
-		@subset(coalescene_data, :g_x .== γ_names[9]).position_maximum_right, 
-				label=label_dict[γ_names[9]],
-				# st = :scatter,
-				l = (3, :solid),
-				ylabel = "Δh", 
-				xlabel = "t/τ",
-				ylims=(500, 800),
-				legend = :topleft,
-				#yaxis = :log,
-				grid = false,
-				legendfontsize = 12,		# legend font size
-    			tickfontsize = 14,			# tick font and size
-    			guidefontsize = 15,
-				# marker = (:circle, 8, 0.6, Plots.stroke(0, :gray)),
-				)
-	plot!(@subset(coalescene_data, :g_x .== γ_names[8]).t_norm, #[log_t] 
-		@subset(coalescene_data, :g_x .== γ_names[8]).position_maximum_right, 
-				label=label_dict[γ_names[8]],
-				# st = :scatter,
-				l = (3, :dash),
-				# marker = (:circle, 8, 0.6, Plots.stroke(0, :gray)),
-				)
-	plot!(@subset(coalescene_data, :g_x .== γ_names[10]).t_norm, #[log_t] 
-		@subset(coalescene_data, :g_x .== γ_names[10]).position_maximum_right, 
-				label=label_dict[γ_names[10]],
-				# st = :scatter,
-				l = (3, :dash),
-				# marker = (:circle, 8, 0.6, Plots.stroke(0, :gray)),
-				)
+	go_back = "C:\\Users\\zitz\\Software_Projects\\Swalbe.jl\\data\\Drop_coalescence_long"
+    folder = "\\gamma_10_"
+	surfs = ["const", "tanh5", "tanh100"]
+	snapshots = zeros(1024, 3)
+	for i in enumerate(surfs)
+		df = load(go_back * folder * "$(i[2])_periodic_tmax_100000000_slip_12_L_1024_hm_12_hc_3_gamma_10.jld2") |> DataFrame
+		snapshots[:, i[1]] .= df.h_100000000
+	end
 end
-  ╠═╡ =#
+
+# ╔═╡ 6e01e3cf-1f51-4cff-a87c-0c8c524d415a
+begin
+	final_h = plot(collect(-511:512) ./ 171, snapshots[:, 1] ./ 171, label="γ(x) = γ₀",
+		xlabel="x/R₀", ylabel="h/R₀",
+		st = :samplemarkers,
+		w=3,
+		step = 40, 
+		marker = (:circle, 8, 0.6, Plots.stroke(0, :gray)),
+		legendfontsize = 12,		# legend font size
+	    tickfontsize = 14,			# tick font and size
+	    guidefontsize = 15,
+		legend=:best,
+		grid=false,
+		)
+	plot!(collect(-511:512) ./ 171, snapshots[:, 2] ./ 171, 
+		label="γ(x) = s(x;5)",
+		st=:samplemarkers,
+		l=(3, :dash),
+		step = 40, 
+		marker = (:star, 8, 0.6, Plots.stroke(0, :gray)))
+	plot!(collect(-511:512) ./ 171, snapshots[:, 3] ./ 171, label="γ(x) = s(x;100)",
+		st=:samplemarkers,
+		l=(3, :dashdot),
+		step = 40, 
+		marker = (:ut, 8, 0.6, Plots.stroke(0, :gray)))
+	plot!(ylims=(0, 0.25), xlims=(-3.0, 3.0))
+end
+
+# ╔═╡ 663f5e86-9008-425f-a1b8-41d0231b1576
+savefig( final_h, "..\\Figures\\h_final_three.svg")
 
 # ╔═╡ edde35ab-d4fe-4fc2-b63f-c1d198df6b99
 md"
@@ -434,7 +444,9 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DataFramesMeta = "1313f7d8-7da2-5740-9ea0-a2ca25f37964"
+FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
+JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 
@@ -442,7 +454,9 @@ PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 CSV = "~0.10.4"
 DataFrames = "~1.3.4"
 DataFramesMeta = "~0.11.0"
+FileIO = "~1.14.0"
 HTTP = "~0.9.17"
+JLD2 = "~0.4.22"
 Plots = "~1.29.1"
 PlutoUI = "~0.7.39"
 """
@@ -635,6 +649,12 @@ git-tree-sha1 = "d8a578692e3077ac998b50c0217dfd67f21d1e5f"
 uuid = "b22a6f82-2f65-5046-a5b2-351ab43fb4e5"
 version = "4.4.0+0"
 
+[[deps.FileIO]]
+deps = ["Pkg", "Requires", "UUIDs"]
+git-tree-sha1 = "9267e5f50b0e12fdfd5a2455534345c4cf2c7f7a"
+uuid = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
+version = "1.14.0"
+
 [[deps.FilePathsBase]]
 deps = ["Compat", "Dates", "Mmap", "Printf", "Test", "UUIDs"]
 git-tree-sha1 = "129b104185df66e408edd6625d480b7f9e9823a0"
@@ -795,6 +815,12 @@ version = "1.4.0"
 git-tree-sha1 = "a3f24677c21f5bbe9d2a714f95dcd58337fb2856"
 uuid = "82899510-4779-5014-852e-03e436cf321d"
 version = "1.0.0"
+
+[[deps.JLD2]]
+deps = ["FileIO", "MacroTools", "Mmap", "OrderedCollections", "Pkg", "Printf", "Reexport", "TranscodingStreams", "UUIDs"]
+git-tree-sha1 = "81b9477b49402b47fbe7f7ae0b252077f53e4a08"
+uuid = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
+version = "0.4.22"
 
 [[deps.JLLWrappers]]
 deps = ["Preferences"]
@@ -1504,8 +1530,10 @@ version = "0.9.1+5"
 # ╠═7a244fc8-a74d-4e12-892e-570cef474bca
 # ╠═94a0e918-53e0-4348-b577-f331ea211cfa
 # ╠═a30ea74e-3614-4eb8-91f4-5d89a0f2f73c
-# ╠═1777c3d2-6a65-4524-a3d6-5c4d785284d1
-# ╠═50a6e24b-eeb9-44bb-8dd2-1efece2d7643
+# ╟─d3e3929c-97e5-4635-ad25-54ea87c24c82
+# ╠═4eb19849-a429-4a69-a382-f4e04e706105
+# ╠═6e01e3cf-1f51-4cff-a87c-0c8c524d415a
+# ╠═663f5e86-9008-425f-a1b8-41d0231b1576
 # ╠═edde35ab-d4fe-4fc2-b63f-c1d198df6b99
 # ╟─1429de49-123c-4ce9-8713-b654379f61f5
 # ╟─00000000-0000-0000-0000-000000000001
