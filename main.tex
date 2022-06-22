@@ -402,44 +402,90 @@ The $h_0(t)$ reaches a maximum and decreases rapidly to $h_0(t) \approx h_{\ast}
 An effect that can not be explained without considering the disjoining pressure Eq.~(\ref{eq:disjoin}) and the resulting flow Eq.~(\ref{eq:OronPlus}) in which $\pi(h)$ changes it's sign with increasing $h$.
 Interestingly, the separation time scale is $\gamma(x)$ dependent.
 
-\subsection{Droplet separation}\label{subsec:separation}
-% In Fig.~\ref{fig:bridge_growth} at some point all data diverges from the powerlaw Eq.~(\ref{eq:coal_powerlaw}).
-The evolution of the bridge and therefore the flow is highly sensitive to the surface tension $\gamma(x)$, see Fig~\ref{fig:bridge_growth}.
-Choosing a constant surface tension $\gamma(x) = \gamma_0$, almost all data is in agreement with $\propto t^{2/3}$.
-Given Eqs.~(\ref{eq:gamma_step}-\ref{eq:gamma_tanh}) the less smeared the transition in the surface tension is, the sooner the bridges can't be explained using the powerlaw.
-Turning the argument around, the more space the transition between $\gamma_0$ and $\gamma_0-\Delta\gamma$ can occupy, the longer it takes the system to deviate from the fit.
-Two things are happening here, first being that the bridge is moving.
-The point of minimal thickness between the droplets shifts its location towards smaller surface tension.
-In agreement with the smearing ar
-As fluid is moving into the droplet with higher surface tension a volume depleation of the lower is.
-Measuring the maximal height $h_d$ for the left and right droplet over time we have an understanding of how much mass is transported, see Fig.~\ref{fig:drop_diff}. 
-The quantity $\Delta h$ is the absolute value of this difference,
-\begin{equation}\label{eq:drop_diff_h}
-    \Delta h = |h_{d,1} - h_{d,2}|
-\end{equation}
-
-Due to our setup with a time independent surface tension, the coordinate of $h_0(t)$ slightly moves towards a region of lower surface tension.
-This behavior is consistent up to the point when $w \geq R_0$. 
-
-% \begin{figure}
-%     \centering
-%     \includegraphics[width=0.48\textwidth]{Figures/skew_evo.pdf}
-%     \caption{Skewenss $\mu_3$ displayed during the time evolution for various surface tension gradients.}
-%     \label{fig:skewness}
-% \end{figure}
+\subsection{Separation and asymmetric coalescence}\label{subsec:separation}
 \begin{figure}
     \centering
     \includegraphics[width=0.48\textwidth]{Figures/hdiff.pdf}
-    \caption{Difference between the maxima of the two droplets over time.
-    T
-    Different symbols and colors depict different $\gamma(x)$'s.}
+    \caption{Difference between the maxima of the two droplets.
+    In blue, we supply the symmetric coalescence using $\gamma(x) = \gamma_0$.
+    All other curves are subject to a surface tension gradient, with different symbols and colors show different $\gamma(x)$.
+    %Up to a smearing width of $w < 50$ all curves collapse to singe one at small time scales.
+    }
     \label{fig:drop_diff}
 \end{figure}
+The evolution of the bridge and therefore the flow is highly sensitive to the surface tension $\gamma(x)$, see Fig~\ref{fig:bridge_growth}.
+Choosing a constant surface tension $\gamma(x) = \gamma_0$, almost all data is in agreement with $\propto t^{2/3}$.
+Given Eqs.~(\ref{eq:gamma_step}-\ref{eq:gamma_tanh}) the less smeared the transition in the surface tension is, the sooner the bridges can't be explained by the powerlaw.
+Turning the argument around, the more space the transition between $\gamma_0$ and $\gamma_0-\Delta\gamma$ can occupy, the longer it takes the system to deviate from the fit.
+Two things are happening here, the first is being that the bridge is moving.
+The point of minimal thickness between the droplets shifts its location towards smaller surface tension.
+As fluid is flowing in the direction of higher surface tension, the bridge is travelling downstream.
+
+This behavior is more pronounced for larger smearing values $w$.
+Increasing $w$ yields smaller $\partial_x\gamma$ values, as can be computed using Eq.~(\ref{eq:gamma_tanh}). 
+Interestingly, for $w\approx R_0$ we no longer see a separation, but an asymmetric coalescence.
+Which is a consequence of traveling bridge and the mass transport.
+A simpler measure to assess this statement is the difference in droplet height,
+\begin{equation}\label{eq:drop_diff_h}
+    \Delta h = |h_{d,1} - h_{d,2}|
+\end{equation}
+where $h_{d,i}$ with $i=1,2$ identifies the left and right droplet, respectively.
+These measurements are shown in Fig.~\ref{fig:drop_diff} for a subset of chosen surface tension fields.
+For $w < 50$ or $w/R_0 \le 1/3$ we observe a collapse of the data on short time scales.
+The same curves, leaving aside the constant surface tension, show a pronounced change in their slope.
+This change is due to the separation and the limited transport in the precursor layer.
+Best seen by the yellow triangles where at $t \approx 85$ a kink appears, after which the difference is only growing slowly.
+For larger smearing, therefore $w > 50$ we find the system in a transition between asymmetric coalescence and late time separation.
+Meaning that $\partial_x h$ does not change sign between the two droplets, due to $h_d \approx h_0$ for one of the droplets. 
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.48\textwidth]{Figures/pressures_three_gam_end.pdf}
+    \caption{Pressure distribution around the bridge for three different $\gamma(x)$, Eq.~(\ref{eq:pressure}).
+    Solid lines with bullets display the capillary contribution $\partial_x^2 h$ while dashed lines with stars show the disjoining component, Eq.~(\ref{eq:disjoin}.
+    On the y-axis we normalize the pressures with $p_0$, see Eq.~\ref{eq:pressure_norm}.
+    The x-axis shows the center of the domain $l$ and $\approx R_0$ to the left and the right.
+    In the inset, we zoom into the region at $P/p_0 \approx 0$. 
+    For $\gamma(x) = s(x;100)$ (green curves) the disjoining pressure is vanishing.}
+    \label{fig:pressures}
+\end{figure}
+To have a better understanding of this process, we measure the two pressure components $\partial_x^2 h$ and $\Pi(h)$, shown in Fig.~\ref{fig:pressures}.
+The full (dashed) lines with bullets (stars) show $\gamma(x)\partial_x^2 h$ ($\Pi(h)$). 
+With different colors different $\gamma(x)$ are displayed, all data is shown at the same time step at $t\approx 130\tau$.
+To normalize both pressure components, we use 
+\begin{equation}\label{eq:pressure_norm}
+    p_0 = \frac{\gamma}{R},
+\end{equation}
+with $\gamma = \gamma_0$ and $R = R_0$.
+Knowing that the coalescence is driven by capillarity ($\gamma\partial_x^2 h$) we expect that $\partial_x^2 h > \Pi(h)$ for $\gamma(x) = \gamma_0$.
+Interestingly, already for the smearing $w=100$ this inequality holds true, which is shown in the inset of Fig.~\ref{fig:pressures}.
+Reducing the smearing and having a sharp surface tension transition, the disjoining pressure is the dominating force.
+The blue dashed line, for example, the large negative $\Pi(h)$, induces a flow from positive to negative $x$ values.
+While the value seem large, keep in mind that the precursor layer only allows for a limited flow.
+Still, we argue that at small scales ($R_0 \approx 1\mu m$) the disjoining pressure does influence the coalescence behavior quite significantly.
+Lastly, the reduction in scale yields one further difference to, e.g. ref.~\cite{karpitschka2014sharp}.
+The statement that the coalescence or non-coalescence is only depending on the absolute surface tension difference ($\gamma_0-\Delta\gamma$) does not hold true.
+Instead, the similar differences can either lead to separation, yellow hexagons Fig.~\ref{fig:bridge_growth} and green hexagons Fig.~\ref{fig:drop_diff} or asymmetric coalescence, see cyan pentagons Fig.~\ref{fig:bridge_growth}.
+Given, it is possible to have highly controllable surface tension field.
+
 
 \section{Summary and Conclusions}\label{sec:sum_conclu}
-We have performed numerical simulations of coalescing droplets on a rigid substrate based on the thin film equation.
-For droplets at small scales ($R \approx 1\mu m$) we assume that the disjoining pressure can not be neglected and therefore include it. 
-The droplets are subject to a surface tension gradient that which is decoupled from the liquid.
+
+To summarize, we have performed numerical experiments of sessile droplet coalescence with a lattice Boltzmann method based on the thin film equation with an effective Marangoni contribution.
+The droplets were subject to a surface tension gradient and a model for the disjoining pressure has been considered.
+Making strong assumptions on the theoretical formulation, i.e. quasi static profile, we have shown that the disjoining pressure has an effect on the flow.
+In numerical experiments, we are able to reproduce the known scaling for the liquid bridge $h_0(t) \propto t^{2/3}$ using a constant surface tension.
+
+Using a spatially resolved surface tension $\gamma(x)$ we observe two different scenarios.
+From references experiments with different miscible liquids, we know that the Marangoni flow can prevent coalescence.
+This behavior translates to the first scenario, where the bridge even decreases in height.
+Interestingly, the bridge evolution strongly dependent on the concrete choice of $\gamma(x)$.
+Using a step function between the two plateau values, the bridge quickly decreases and the coalescence process is stopped.
+Instead, the droplets away from each other.
+Smearing the step using a tangent hyperbolicus we have a transient bridge growth that for small smearing widths leads to separation.
+
+If the smearing width becomes large $\approx R_0$ the resulting flow promotes an asymmetric coalescence.
+One droplet is draining liquid from the other one due to the Marangoni effect. 
 
 
 \begin{acknowledgements}
