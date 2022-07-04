@@ -227,6 +227,59 @@ begin
 		)
 end
 
+# ╔═╡ e2dd8091-3a5e-448c-87df-f8bdc734afdc
+begin
+	plot(@subset(coalescene_data, :g_x .== γ_names[i]).t_norm, #[log_t] 
+		@subset(coalescene_data2, :g_x .== γ_names[i]).drop_diff, 
+				label=label_dict[γ_names[i]],
+				# st = :scatter,
+				l = (3, :solid),
+				ylabel = "Δh", 
+				xlabel = "t/τ",
+				legend = :bottomright,
+				axis = :log,
+				minorticks=10,
+				grid = false,				
+		      	st = :samplemarkers, 				# some recipy stuff
+		        step = 1000, 						# density of markers
+		        marker = (:circle, 8, 0.6, Plots.stroke(0, :gray)),	
+				legendfontsize = 12,		# legend font size
+    			tickfontsize = 14,			# tick font and size
+    			guidefontsize = 15,
+				xlims= (10, 200),
+				ylims = (0.1, 20)
+				)
+	plot!(@subset(coalescene_data, :g_x .== γ_names[2]).t_norm, #[log_t] 
+			@subset(coalescene_data, :g_x .== γ_names[2]).drop_diff, 
+					label=label_dict[γ_names[2]],
+					l = (3, :dash),
+					st = :samplemarkers, 				# some recipy stuff
+		        	step = 1000,
+					marker = (marker_dict[k-1], 8, 0.6, Plots.stroke(0, :gray)),
+		)
+	for k in 5:7
+		plot!(@subset(coalescene_data, :g_x .== γ_names[k]).t_norm, #[log_t] 
+			@subset(coalescene_data, :g_x .== γ_names[k]).drop_diff, 
+					label=label_dict[γ_names[k]],
+					l = (3, :auto),
+					st = :samplemarkers, 				# some recipy stuff
+		        	step = 1000,
+					# st = :scatter,
+					marker = (marker_dict[k-1], 8, 0.6, Plots.stroke(0, :gray)),
+		)
+	end
+	plot!(@subset(coalescene_data, :g_x .== γ_names[8]).t_norm, #[log_t] 
+			@subset(coalescene_data, :g_x .== γ_names[8]).drop_diff, 
+					label=label_dict[γ_names[8]],
+					l = (3, :auto),
+					st = :samplemarkers, 				# some recipy stuff
+		        	step = 1000,
+					marker = (marker_dict[8], 8, 0.6, Plots.stroke(0, :gray)),
+					# ylims=(1e-3, 100)
+		)
+	plot!(collect(1:0.1:300), 0.2 * collect(1:0.1:300).^(3/4))
+end
+
 # ╔═╡ 8377837a-24b9-47ad-9777-1f9c89c32d41
 # pwd()
 # savefig(hdiff, "..\\figures\\hdiff.svg")
@@ -419,6 +472,118 @@ end
 
 # ╔═╡ 663f5e86-9008-425f-a1b8-41d0231b1576
 savefig( final_h, "..\\Figures\\h_final_three.svg")
+
+# ╔═╡ 7d4c9009-ac77-4a4d-9010-5c69681b2004
+md"## Bridge velocity
+
+In our simulations we saw that the bridge is moving.
+Meaning that changes it's position with time.
+While Marangoni flow drives fluid into regions of higher surface tension we observe a countervise motion of the bridge."
+
+# ╔═╡ 57f46a0f-080b-4d14-bdb0-329f04f424c2
+md"## Surface tension fields
+
+For a better understanding of the surface tension fields we supply a plot of the various $\gamma(x)$.
+
+We use three different fields for this study.
+1. Constant surface tension
+2. A surface tension step
+3. Smoothing using a $\tanh$ with variable smearing widths $w$
+
+"
+
+# ╔═╡ 4e7a81c7-e8ac-4733-862c-8de6d7589faa
+begin 
+	L = 1024
+	γ₀ = 1e-5
+end
+
+# ╔═╡ 20296440-d014-4ce3-9f56-ab91393f9b9e
+"""
+	const_gamma()
+
+Constant surface tension over the whole domain.
+"""
+function const_gamma(;L=L, γ=γ₀)
+    return fill(γ, L)
+end
+
+# ╔═╡ 2321e432-65be-4df6-80f2-c91eef4e9a84
+"""
+	step_gamma()
+
+A step like surface tension field, using the equation below
+
+`` \\gamma(x) = \\begin{cases} \\gamma_0\\qquad\\qquad\\text{for}~x < L/2 \\\\ \\gamma_0 - \\frac{2 \\gamma_0}{10}\\quad\\text{else}
+	\\end{cases}
+``
+"""
+function step_gamma(;L=L, γ=γ₀, perc=20)
+    x = ones(L)
+    for i in 1:L
+        if i < L÷2
+            x[i] = γ
+        else
+            x[i] = γ - (γ * perc / 100)
+        end
+    end
+    return x
+end
+
+# ╔═╡ 4a287282-6aae-491e-a8f9-40351b7d8d7c
+"""
+	tanh_gamma()
+
+A tangent hyperbolicus to smooth the surface tension step, using the equation
+
+`` \\gamma(x) = \\gamma_0\\cdot \\bigg|1 - \\big( \\frac{1}{2} - s(x,l,w) \\big)\\bigg| + ( \\gamma_0 - \\Delta \\gamma) \\bigg[1 - \\bigg|1 - \\big( \\frac{1}{2} - s(x,l,w) \\big) \\bigg| \\bigg]   
+``
+"""
+function tanh_gamma(;L=L, γ=γ₀, perc=20, sl=1)
+    l = collect(1.0:L)
+    function smooth(l, L, sl)
+		return abs.(1 .- (0.5 .+ 0.5 .* tanh.((l .- L÷2) ./ (sl))))
+	end
+	x = ones(L)
+	x .= γ .* smooth(l, L, sl) .+ (1 .- smooth(l, L, sl)) .* (γ - (γ * perc / 100)) 
+	return x
+end
+
+# ╔═╡ 22a15d69-4435-48d1-90a8-9187987e49da
+begin
+	x_r0 = collect(-511:512) ./ 171
+	# step_gamma(γ=s), tanh_gamma(sl=1, γ=s),
+	Gammas = plot(x_r0, const_gamma(γ=γ₀) ./ const_gamma(γ=γ₀),  label="γ(x) = γ₀",
+		xlabel="x/R₀", ylabel="γ/γ₀",
+		st = :samplemarkers,
+		w=3,
+		step = 40, 
+		marker = (:circle, 8, 0.6, Plots.stroke(0, :gray)),
+		legendfontsize = 12,		# legend font size
+	    tickfontsize = 14,			# tick font and size
+	    guidefontsize = 15,
+		legend=:bottomleft,
+		grid=false,
+		ylim=(0.78, 1.02))
+	plot!(x_r0, step_gamma(γ=γ₀) ./ const_gamma(γ=γ₀),  label="γ(x) = Θ(x)",
+		st = :samplemarkers,
+		w=3,
+		step = 40, 
+		marker = (:star, 8, 0.6, Plots.stroke(0, :gray)))
+	plot!(x_r0, tanh_gamma(γ=γ₀, sl=5) ./ const_gamma(γ=γ₀),  label="γ(x) = s(x;5)",
+		st = :samplemarkers,
+		w=3,
+		step = 40, 
+		marker = (:ut, 8, 0.6, Plots.stroke(0, :gray)))
+	plot!(x_r0, tanh_gamma(γ=γ₀, sl=100) ./ const_gamma(γ=γ₀),  label="γ(x) = s(x;100)",
+		st = :samplemarkers,
+		w=3,
+		step = 40, 
+		marker = (:rect, 8, 0.6, Plots.stroke(0, :gray)))
+end
+
+# ╔═╡ bd2b3f2f-cfdf-4ff4-ba59-0353a91f07ea
+savefig(Gammas, "..\\Figures\\gammas.svg")
 
 # ╔═╡ edde35ab-d4fe-4fc2-b63f-c1d198df6b99
 md"
@@ -1520,6 +1685,7 @@ version = "0.9.1+5"
 # ╟─8c713445-d87a-47e2-a753-e6f6f4812a7a
 # ╟─8ffb2721-e939-45b0-8566-ad8c350a05b4
 # ╠═8707f1b4-8418-4ebc-99e1-b6aba22c25d2
+# ╠═e2dd8091-3a5e-448c-87df-f8bdc734afdc
 # ╟─8377837a-24b9-47ad-9777-1f9c89c32d41
 # ╟─42dc5c99-1980-421e-b993-2ea92e6fde5c
 # ╟─0c175894-a5dd-4844-af32-e24a2d1dc03a
@@ -1534,6 +1700,14 @@ version = "0.9.1+5"
 # ╠═4eb19849-a429-4a69-a382-f4e04e706105
 # ╠═6e01e3cf-1f51-4cff-a87c-0c8c524d415a
 # ╠═663f5e86-9008-425f-a1b8-41d0231b1576
+# ╠═7d4c9009-ac77-4a4d-9010-5c69681b2004
+# ╟─57f46a0f-080b-4d14-bdb0-329f04f424c2
+# ╠═4e7a81c7-e8ac-4733-862c-8de6d7589faa
+# ╟─20296440-d014-4ce3-9f56-ab91393f9b9e
+# ╟─2321e432-65be-4df6-80f2-c91eef4e9a84
+# ╟─4a287282-6aae-491e-a8f9-40351b7d8d7c
+# ╠═22a15d69-4435-48d1-90a8-9187987e49da
+# ╠═bd2b3f2f-cfdf-4ff4-ba59-0353a91f07ea
 # ╠═edde35ab-d4fe-4fc2-b63f-c1d198df6b99
 # ╟─1429de49-123c-4ce9-8713-b654379f61f5
 # ╟─00000000-0000-0000-0000-000000000001
