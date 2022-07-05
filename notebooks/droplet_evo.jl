@@ -322,7 +322,6 @@ end
 
 # ╔═╡ a2ed13b5-84db-4f02-bd6d-39f39ba5642c
 begin
-	using Base.Iterators: cycle, take
 	tau_sep = plot(gamma_n[1:5] ./ 171, sep_time[1:5],
 		st = :scatter,
 		xlabel = "w/R₀",
@@ -338,11 +337,13 @@ begin
 		ylims=(0,80),
 		)
 	data_x = collect(0:0.001:1)
-	plot!(data_x , data_x .* 500, l=(3, :dash, :black), label="f(x)=3w")
+	Δγ = 8e-6
+	plot!(data_x , data_x.^(3/2) .* 1700, l=(3, :dash, :black), label="∝εw^(3/2)")
+	# plot!(data_x , data_x.^2 ./ (22*Δγ), l=(3, :dash, :gray), label="w²/(2(γ₀-Δγ)")
 end
 
 # ╔═╡ ba644615-6717-4598-81cc-b8484e5f4855
-# savefig(tau_sep, "..\\figures\\hdiff.svg")
+# savefig(tau_sep, "..\\figures\\tausep_6over5.svg")
 
 # ╔═╡ e6a1d40d-3ae1-4608-9788-e6a149d8f283
 md"What is interesting in this plot is the linear depenedency on the smearing width.
@@ -356,8 +357,103 @@ Clearly the offset is small, so $w_0 = 0$ for now.
 More interesting is the slope.
 For now I have no understanding why the slope takes the value it has.
 Problem for Stefan after the reviews.
+"
 
-### Pressures
+# ╔═╡ 7d4c9009-ac77-4a4d-9010-5c69681b2004
+md"## Bridge velocity
+
+In our simulations we saw that the bridge is moving.
+Meaning that changes it's position with time.
+While Marangoni flow drives fluid into regions of higher surface tension we observe a motion of the bridge downstream.
+Fluid passes into the left droplet and increases the bridge height $h_0$, by doing so it pushes the bridge to the right.
+Until the bridge does not longer exists and the droplets are either separated or coalesced.
+
+One hypothesis is that the droplets separate when the bridge traveled to a region without surface tension gradient, 
+
+```math
+	x_{sep} := \gamma(x) = \gamma_0 - \Delta\gamma .
+```
+
+This can be tested easily as we have data on the bridge position for all runs.
+Let's plot it for a few examples
+"
+
+# ╔═╡ 7eff52dc-5ae5-4655-b8ad-1e366b61dbbc
+begin
+	#plot(@subset(coalescene_data, :g_x .== γ_names[i]).t_norm, #[log_t] 
+		# @subset(coalescene_data2, :g_x .== γ_names[i]).neck_pos .- 172, 
+				# label=label_dict[γ_names[i]],
+				# st = :scatter,
+				# l = (3, :solid),
+				# ylabel = "χ/R₀", 
+				# xlabel = "t/τ",
+				# legend = :topleft,
+				# xaxis = :log,
+				# grid = false,				
+		      	# st = :samplemarkers, 				# some recipy stuff
+		        # step = 1000, 						# density of markers
+		        # marker = (:circle, 8, 0.6, Plots.stroke(0, :gray)),	
+				# legendfontsize = 12,		# legend font size
+    			# tickfontsize = 14,			# tick font and size
+    			# guidefontsize = 15,
+				# xlim = (0.1, 100),
+				# ylim = (-2, 30),
+				# )
+	bv = plot(@subset(coalescene_data, :g_x .== γ_names[3]).t_norm, #[log_t] 
+		(@subset(coalescene_data, :g_x .== γ_names[3]).neck_pos .- 512) ./ 171, 
+				label=label_dict[γ_names[3]],
+				# st = :scatter,
+				l = (3, :solid),
+				ylabel = "χ/R₀", 
+				xlabel = "t/τ",
+				legend = :topleft,
+				axis = :log,
+				grid = false,				
+		      	# st = :samplemarkers, 				# some recipy stuff
+		        # step = 1000, 						# density of markers
+		        # marker = (:circle, 8, 0.6, Plots.stroke(0, :gray)),	
+				legendfontsize = 12,		# legend font size
+    			tickfontsize = 14,			# tick font and size
+    			guidefontsize = 15,
+				xlim = (0.1, 100),
+				# ylim = (-2, 30),
+				)
+
+	plot!(@subset(coalescene_data, :g_x .== γ_names[5]).t_norm, #[log_t] 
+		(@subset(coalescene_data, :g_x .== γ_names[5]).neck_pos .- 512) ./ 171, 
+				label=label_dict[γ_names[5]],
+				# st = :scatter,
+				l = (3, :solid),
+				)
+	plot!(@subset(coalescene_data, :g_x .== γ_names[6]).t_norm, #[log_t] 
+		(@subset(coalescene_data, :g_x .== γ_names[6]).neck_pos .- 512) ./ 171, 
+				label=label_dict[γ_names[6]],
+				# st = :scatter,
+				l = (3, :solid),
+				)
+	plot!(@subset(coalescene_data, :g_x .== γ_names[7]).t_norm, #[log_t] 
+		(@subset(coalescene_data, :g_x .== γ_names[7]).neck_pos .-512) ./ 171, 
+				label=label_dict[γ_names[7]],
+				# st = :scatter,
+				l = (3, :solid),
+				)
+	# scatter!(sep_time[3], 512 .- @subset(coalescene_data, :g_x .== γ_names[5]).neck_pos[])
+end
+
+# ╔═╡ b428d804-6211-45be-b753-41a7580f1d52
+savefig(bv, "..\\figures\\bridge_vel_log.svg")
+
+# ╔═╡ 7ffa2d9f-8bee-4775-9f65-81fe05875e1d
+begin
+	for i in 1:5
+		ts = i
+		nm = ts+2
+		println(coalescene_data[(coalescene_data.g_x .== γ_names[nm]) .& (coalescene_data.t_norm .== sep_time[ts]), :neck_pos])
+	end
+end
+
+# ╔═╡ c02d1b7a-b8f8-457c-96f2-383a6422a36d
+md"### Pressures
 
 One last thing that we are looking into is the distribution of the pressures.
 The pressure is something similar to 
@@ -473,13 +569,6 @@ end
 # ╔═╡ 663f5e86-9008-425f-a1b8-41d0231b1576
 savefig( final_h, "..\\Figures\\h_final_three.svg")
 
-# ╔═╡ 7d4c9009-ac77-4a4d-9010-5c69681b2004
-md"## Bridge velocity
-
-In our simulations we saw that the bridge is moving.
-Meaning that changes it's position with time.
-While Marangoni flow drives fluid into regions of higher surface tension we observe a countervise motion of the bridge."
-
 # ╔═╡ 57f46a0f-080b-4d14-bdb0-329f04f424c2
 md"## Surface tension fields
 
@@ -583,7 +672,17 @@ begin
 end
 
 # ╔═╡ bd2b3f2f-cfdf-4ff4-ba59-0353a91f07ea
-savefig(Gammas, "..\\Figures\\gammas.svg")
+# savefig(Gammas, "..\\Figures\\gammas.svg")
+
+# ╔═╡ 3cd97467-9991-485b-8e33-a07655038c8e
+begin
+	x = tanh_gamma(γ=γ₀, sl=5)
+	plot(x, xlim = (500, 524))
+	grads = zeros(1024)
+	grads .= circshift(x, 1) .- circshift(x, -1)
+	grads[1:3] .= grads[1022:end] .= 0
+	plot!(20 .* grads)
+end
 
 # ╔═╡ edde35ab-d4fe-4fc2-b63f-c1d198df6b99
 md"
@@ -1688,10 +1787,15 @@ version = "0.9.1+5"
 # ╠═e2dd8091-3a5e-448c-87df-f8bdc734afdc
 # ╟─8377837a-24b9-47ad-9777-1f9c89c32d41
 # ╟─42dc5c99-1980-421e-b993-2ea92e6fde5c
-# ╟─0c175894-a5dd-4844-af32-e24a2d1dc03a
+# ╠═0c175894-a5dd-4844-af32-e24a2d1dc03a
 # ╠═a2ed13b5-84db-4f02-bd6d-39f39ba5642c
-# ╟─ba644615-6717-4598-81cc-b8484e5f4855
+# ╠═ba644615-6717-4598-81cc-b8484e5f4855
 # ╟─e6a1d40d-3ae1-4608-9788-e6a149d8f283
+# ╠═7d4c9009-ac77-4a4d-9010-5c69681b2004
+# ╠═7eff52dc-5ae5-4655-b8ad-1e366b61dbbc
+# ╠═b428d804-6211-45be-b753-41a7580f1d52
+# ╠═7ffa2d9f-8bee-4775-9f65-81fe05875e1d
+# ╟─c02d1b7a-b8f8-457c-96f2-383a6422a36d
 # ╠═ff16591c-26a8-4330-96d8-dd807b5bc9fb
 # ╠═7a244fc8-a74d-4e12-892e-570cef474bca
 # ╠═94a0e918-53e0-4348-b577-f331ea211cfa
@@ -1700,7 +1804,6 @@ version = "0.9.1+5"
 # ╠═4eb19849-a429-4a69-a382-f4e04e706105
 # ╠═6e01e3cf-1f51-4cff-a87c-0c8c524d415a
 # ╠═663f5e86-9008-425f-a1b8-41d0231b1576
-# ╠═7d4c9009-ac77-4a4d-9010-5c69681b2004
 # ╟─57f46a0f-080b-4d14-bdb0-329f04f424c2
 # ╠═4e7a81c7-e8ac-4733-862c-8de6d7589faa
 # ╟─20296440-d014-4ce3-9f56-ab91393f9b9e
@@ -1708,6 +1811,7 @@ version = "0.9.1+5"
 # ╟─4a287282-6aae-491e-a8f9-40351b7d8d7c
 # ╠═22a15d69-4435-48d1-90a8-9187987e49da
 # ╠═bd2b3f2f-cfdf-4ff4-ba59-0353a91f07ea
+# ╠═3cd97467-9991-485b-8e33-a07655038c8e
 # ╠═edde35ab-d4fe-4fc2-b63f-c1d198df6b99
 # ╟─1429de49-123c-4ce9-8713-b654379f61f5
 # ╟─00000000-0000-0000-0000-000000000001
