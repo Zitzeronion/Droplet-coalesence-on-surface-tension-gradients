@@ -78,7 +78,7 @@ In the limit of large smearing width $w \approx R_0$, we observe an asymmetric c
 \end{abstract}
 
 \maketitle
-
+ 
 \newcommand{\ts}{\textsuperscript}
 
 \section{Introduction}\label{sec:intro}
@@ -249,10 +249,11 @@ This approach is based on the evolution of discrete probability density function
 \begin{equation}\label{eq:LBE}
     \begin{split}
         &f_i(x+c^{(i)}\Delta t,t+\Delta t) = \\
-        &\left(1 - \frac{\Delta t}{\tau}\right) f_i(x,t) + \frac{\Delta t}{\tau} f_i^{(eq)}(x,t) + w_i \frac{\Delta t}{c_s^2} c^{(i)} F,
+        &\left(1 - \omega\right) f_i(x,t) + \omega f_i^{(eq)}(x,t) + w_i \frac{\Delta t}{c_s^2} c^{(i)} F,
     \end{split}
 \end{equation}
-with $F$ being the total force acting on the fluid.
+where $\omega = \Delta t/\tau_{\ast}$ is a relaxation frequency and $\tau_{\ast}$ is relaxation time. 
+The total force acting on the fluid is collected in $F$.
 We adopt the standard D1Q3 (one-dimensional) scheme with $3$ lattice velocities~\cite{krueger2017}, given by
 \begin{equation}\label{eq:speeds}
 c^{(i)}  = [0, c, -c], \quad i = 0, 1, 2,
@@ -347,24 +348,33 @@ The surface tension is evaluated during the pressure calculation Eqs.~(\ref{eq:p
 \section{Results}\label{sec:results}
 \begin{figure}
     \centering
-    \includegraphics[width=0.48\textwidth]{Figures/three_cases.pdf}
-    \caption{Final state of the film thickness $h(x)$ after $10^8$ lattice Boltzmann time iterations.
-    The three different curves correspond to different surface tensions $\gamma(x)$.
-    Simulations with the same initial condition and surface tension difference yield different dynamics based on $\gamma(x)$, see Eqs.~(\ref{eq:gamma_const}, \ref{eq:gamma_tanh}) for details.
-    Both axes are normalized using the initial droplet radius.}
+    \includegraphics[width=0.48\textwidth]{Figures/evo_three_times.pdf}
+    \caption{Snapshots of the thickness $h(x)$ taken at three different time steps for three surface tensions $\gamma(x)$.
+    The three time step have different marks, namely bullets, stars and triangles for $t=14\tau$, $t=140\tau$ and respectively.}
     \label{fig:final_state}
 \end{figure}
 All experiments start with the same initial condition, two barely overlapping circular segments (equivalent to spherical caps in three dimensions) as illustrated in Fig.~\ref{fig:schematics}.
 We use the radius of the initial droplets $R_0$ to normalize length scales~\cite{PhysRevLett.111.144502, PhysRevLett.95.164503}.
 As a characteristic time scale we use the inertio-capillary time, 
 \begin{equation}\label{eq:inertio-cap-time}
-    \tau_{\text{ic.}} = \sqrt{\frac{\rho R_0^3}{\gamma}}.
+    \tau = \sqrt{\frac{\rho R_0^3}{\gamma}}.
 \end{equation}
-Inserting the simulation parameters, see the App.~\ref{app:one}, we get $\tau_{\text{ic.}} \approx 7\cdot 10^5 \Delta t$. 
-In Fig.~\ref{fig:final_state} we display the time evolution of three different surface tension fields.
-
+Inserting values, see the App.~\ref{app:one}, we get $\tau \approx 7\cdot 10^5 \Delta t$. 
+In Fig.~\ref{fig:final_state} we show a time series of our LBM simulations for three different surface tensions.
+In blue, we have the case of a constant surface tension, thus a pure coalescence case.
+The symbols, bullets, stars and triangles display the thickness at $t=0.7\tau$, $t=14\tau$ and $t=140\tau$ respectively. 
+The influence of $\gamma(x)$ is best seen by the green and orange curves, as both of them use Eq.~(\ref{eq:gamma_tanh}) but have different $w$ values.
 
 \subsection{Bridge growth}\label{subsec:growth}
+The liquid bridge between two similar drops on a solid substrate with contact angle $\theta < \pi/2$ is expected to grow according to Eq.~(\ref{eq:coal_powerlaw}). 
+Initially, this growth law has been derived for macroscopic drops for which the disjoining pressure is irrelevant.
+Performing VoF simulations of hexadecan using OpenFOAM, with constant contact angle boundary condition, we find good agreement with Eq.~\ref{eq:coal_powerlaw}.
+The same growth rate holds true in our LBM simulations, with $\Pi(h) \neq 0$ shown by the blue bullets in Fig~\ref{fig:bridge_growth}.
+Only for late stages of the coalescence where $h_0 \sim h_d$ we observe a deviation from the black dashed line give by
+\begin{equation}\label{eq:fit_powerlaw}
+    f(t) = \beta t^{2/3},
+\end{equation}
+with $\beta = 0.01$.
 \begin{figure}
     \centering
     \includegraphics[width=0.48\textwidth]{Figures/bridge_evo_all_2.pdf}
@@ -372,42 +382,24 @@ In Fig.~\ref{fig:final_state} we display the time evolution of three different s
     Different symbols mark different surface tension gradients.
     The black dashed line displays $f(x) = \beta t^{2/3}$, with $\beta \approx 0.01$.}
     \label{fig:bridge_growth}
-\end{figure}
-The liquid bridge between two similar drops on a solid substrate with contact angle $\theta < \pi/2$ is expected to grow according to Eq.~(\ref{eq:coal_powerlaw}). 
-Initially, this growth law has been derived for macroscopic drops for which the disjoining pressure is irrelevant.
-Performing VoF simulations of hexadecan using OpenFOAM, with constant contact angle boundary condition, we find good agreement with Eq.~\ref{eq:coal_powerlaw}.
-Interestingly, the same growth rate holds true in our LBM simulations with $\Pi(h) \neq 0$ shown by blue bullets in Fig.~\ref{fig:final_state}-\ref{fig:bridge_growth}.
-Only for late stages of the coalescence where $h_0 \sim h_d$ we observe a deviation from the black dashed line give by
-\begin{equation}\label{eq:fit_powerlaw}
-    f(t) = \beta t^{2/3},
-\end{equation}
-with $\beta = 0.01$.
-The powerlaw is however fairly dependent on the slippage parameter $\delta$. 
-For a $\delta \ll h_d$ the velocity boundary condition requires a slow flow close to the fluid substrate boundary, see Eq.~(\ref{eq:fric_alpha}). 
-Meaning that the flow into the bridge region is suppressed, and therefore $\alpha < 2/3$.
- 
-Different choices for $\gamma(x)$ act quite severely on the bridge growth.
-Using Eq.~(\ref{eq:gamma_step}) instead of Eq.~(\ref{eq:gamma_const}) is shown by orange diamonds in Fig.~\ref{fig:bridge_growth}.
+\end{figure} 
+
+If we use Eq.~(\ref{eq:gamma_step}) instead of Eq.~(\ref{eq:gamma_const}) we get the orange diamonds in Fig.~\ref{fig:bridge_growth}.
 Clearly, the bridge does not grow, and the droplets do not coalesce.
-While there is no concentration field in our simulations, the results qualitatively agree with references~\cite{karpitschka2014sharp, doi:10.1021/la500459v, PhysRevLett.109.066103, doi:10.1021/la800630w}. 
-Including $\Pi(h) \neq 0$ the bridge even decreases, leaving only a thin precursor layer ($h\sim h_{\ast}$) between the droplets.
-Instead of a steady motion of the twin droplet state, the droplet on the lower surface tension side, therefore $\gamma_0 - \Delta\gamma$ moves away from the step. 
-Resulting in a new equilibrium where $\partial_x\gamma = 0$.
-This is expected because $\partial_x\gamma\neq 0$ induces a force which results in a flow, see Eq.~(\ref{eq:thin_with_marangoni}).
+Although we don't have a concentration field in our simulations, the results qualitatively agree with references~\cite{karpitschka2014sharp, doi:10.1021/la500459v, PhysRevLett.109.066103, doi:10.1021/la800630w}. 
+Including $\Pi(h) \neq 0$ $h_0(t)$ even decreases, leaving only a thin precursor layer ($h\sim h_{\ast}$) between the droplets.
+Instead of a steady motion of the twin droplet state, the droplet on the lower surface tension side ($\gamma = \gamma_0 - \Delta\gamma$) moves away from the step.
+There are two things to consider here, the Marangoni flow and the disjoining pressure.
+The former keeps the bridge height small and the later tries to find an equilibrium for the droplets with $\theta$ as contact angle.
+The moment $h\sim h_{\ast}$ the disjoining pressure dominates, and the result is rearrangement of the three-phase contact line to have a stable droplet away from the surface tension gradient, shown by the orange curve in Fig~\ref{fig:final_state}.
 
 Smearing out the surface tension gradient using Eq.~(\ref{eq:gamma_tanh}) is shown by the remaining symbols in Fig~\ref{fig:bridge_growth}.
-Instead of an immediate separation of the droplets and independent of $w$, see Eq.~(\ref{eq:smoothing}) (different colors and symbols), the bridge starts to grow initially.
-More surprisingly, the growth rate is in agreement with the powerlaw $\propto t^{2/3}$ of Eq.~(\ref{eq:coal_powerlaw}).
-The droplet on the higher surface tension side is sucking fluid from the lower surface tension one.
-This has been observed and explained in ref~\cite{PhysRevLett.109.066103} for $\Pi(h) = 0$.
-The subtle difference in our setup is, that the twin droplet system is not supported by a constant velocity.
-Instead, we solely rely on the balance between $\Pi(h)$ and $\partial_x\gamma(x)$.
-Our understanding is that the system has one global energy minimum, which a single droplet on the high surface tension side.
-A local energy minimum is however found when the droplets separate.
-This can be seen in Fig.~\ref{fig:final_state} orange stars or in Fig.~\ref{fig:bridge_growth} when the symbols start to deviate from the dashed line.
-The bridge height ($h_0(t)$) reaches a maximum and decreases rapidly to $h_0(t) \approx h_{\ast}$.
-An effect that can not be explained without considering the disjoining pressure Eq.~(\ref{eq:disjoin}) and the resulting flow Eq.~(\ref{eq:OronPlus}).
-Interestingly, the separation time scale seems to be linearly dependent on $w$.
+Instead of an immediate separation of the droplets and independently of the smearing width $w$, the bridge starts to grow.
+More surprisingly, the growth rate is in agreement with the powerlaw $t^{2/3}$ of Eq.~(\ref{eq:coal_powerlaw}), with increasing agreement for larger smearing values.
+While the bridge height grows, fluid is flows into the region of higher surface tension.
+The larger the bridge height, the easier it is for the Marangoni flow to drain liquid from the low surface tension droplet.
+Eventually, the bridge height reaches a maximum and decreases rapidly to $h_0(t) \approx h_{\ast}$, similar to the step function.
+The time it takes to,  seems to be linearly dependent on $w$.
 
 \subsection{Separation and asymmetric coalescence}\label{subsec:separation}
 \begin{figure}
