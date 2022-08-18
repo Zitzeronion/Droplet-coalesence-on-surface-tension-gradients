@@ -5,13 +5,13 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ 068a4181-e557-455b-8dc2-944ecf8e5636
-using Plots, DataFrames, FileIO, DataFramesMeta, CSV, LaTeXStrings, Images, Swalbe
+using Plots, DataFrames, FileIO, DataFramesMeta, CSV, Images, Swalbe
 
 # ╔═╡ 71f76f00-d766-11ec-2cbe-85a9418b83a3
 md"# To coalesce or not to coalesce
 
 *A story of two sessile droplets that may stay seperated for eternity.
-Driven apart by a Marangoni and helped by capillarity they seek to be one.*
+Driven apart by Marangoni and helped by capillarity they seek to be one.*
 "
 
 # ╔═╡ 481914ab-9e8b-4059-8ea3-c39429fe8695
@@ -30,18 +30,17 @@ In this case we know that the bridge connecting ($h_0(t)$) them should grow with
 $h_0(t) \propto t^{2/3}.$
 
 We're going to take this case as a starting point for the following experiments.
-We further introduce a surface tension gradient, mimicing an effective Marangoni flow.
-This gradient can for example be introduced with the addition of surfactants. 
-Therefore putting surfactants only in one of the two droplets.
-Not with surfactants but with different but miscible liquids one observes that this gradient stabilizes a twin droplet state.
-Riegler and Lazaro [[8](https://pubs.acs.org/doi/abs/10.1021/la800630w)] first and later by Karpitschka et al. [[9](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.109.066103), [10](https://pubs.acs.org/doi/abs/10.1021/la500459v), [11](https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/article/abs/sharp-transition-between-coalescence-and-noncoalescence-of-sessile-drops/121D63B9ABFD9040C327ED8AC10FBE01)] have shown that the powerlaw does no longer look like the one above but
+We further introduce a surface tension gradient and therefore an effective Marangoni flow.
+Marangoni flows naturally appear when there is a concentration gradient, e.g. surfactant concentratio. 
+Not with surfactants but with different but miscible liquids one observes that a Marangoni flow can stabilize a twin droplet state and prohibit coalescence.
+Riegler and Lazar [[8](https://pubs.acs.org/doi/abs/10.1021/la800630w)] first and later by Karpitschka et al. [[9](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.109.066103), [10](https://pubs.acs.org/doi/abs/10.1021/la500459v), [11](https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/article/abs/sharp-transition-between-coalescence-and-noncoalescence-of-sessile-drops/121D63B9ABFD9040C327ED8AC10FBE01)] have shown that the coalescence is stopped and that the bridge height
 
 $h_0(t) \propto h_0(0).$
 
 Meaning that the droplets do not coalesce.
 Instead however the whole twin-droplet system is moving with a small but measurable velocity.
 This actually happens when the surface tension gradient is rather steep or sharp.
-What we will now discuss is the case in between those boundaries.
+What we will discuss is the case in between simple coalescence and sharp concentration gradients.
 
 - No gradient : $h_0(t) \propto t^{2/3}$ 
 - A sharp gradient: $h_0(t) = const$ 
@@ -52,7 +51,6 @@ What we will now discuss is the case in between those boundaries.
 Simulations or numerical experiments are performed using the solver *[Swalbe.jl](https://github.com/Zitzeronion/Swalbe.jl)* (using the surface_tension_gradient branch).
 As of now these simulations are work in progress and surface tension gardients are not yet part of the master branch.
 Understand this as a note of caution, this is not a laboratory experiment!
-
 
 ## Visual setup
 "
@@ -67,10 +65,10 @@ end
 # ╔═╡ 94886a7f-fc0e-434e-9338-bb92d5442542
 md"## Numerical experiments
 
-Automation is the friend of every software developer, assuming it works.
+[Automation](https://xkcd.com/1319/) is the friend of every software developer, assuming it works.
 Here we follow this ideal of having a single script to create all the data we desire.
-What we desire is data of the boundary cases, therefore no gradient, sharp gradient and some more data in between them.
-The script can be found in the **scripts** folder and contains all parameters and functions.
+What we desire is data of the boundary cases, therefore no surface tension gradient, a sharp surface tension gradient and lots of data in between them.
+The script can be found in the **scripts** [droplet_coalescence.jl](https://github.com/Zitzeronion/Droplet-coalesence-on-surface-tension-gradients/blob/main/scripts/droplet_coalescence.jl) folder and contains all parameters and functions.
 
 For completeness we like to display the run function in the cell below.
 We need to supply an sys constant struct, which contains size of the lattice and a few other things and a surface tension field. Arguments past the semicolon are optional and have a default value.
@@ -84,6 +82,51 @@ Line 26 to line 47 displays the lattice Boltzmann time loop.
 
 where T is a time at which the simulation should have converged.
 "
+
+# ╔═╡ 88dc323f-f640-4bd8-9db8-7965785663e2
+md"This functions generates a single data set. 
+What is missing is an iteration over different surface tension fields.
+The concrete choice for the spatially resolved surface tension is given by either one of three functions,
+
+## Surface tensions
+
+$\gamma^{const.}(x) = \gamma_0$
+
+where γ₀ is a characteristic surface tension value. 
+Besides the constant surface tension, we use a model given by
+"
+
+# ╔═╡ 34c92941-5dc5-4fe8-bc27-3712c0bab86b
+md"$\gamma^{heavi}(x) = \begin{cases}\gamma_0\qquad\qquad\text{for x < L/2}\\ \gamma_0(1-\epsilon)\quad \text{else}\end{cases},$
+
+with a Heaviside step function at the touching point where ϵ is a small deviation and $L$ is the size of the system.
+"
+
+# ╔═╡ d4fbe0fd-9197-48db-9c36-6af49601155b
+md"A third option is given, using a tangent hyperbolicus to smoothen out the discontinuity of the Heaviside function.
+Therefore, the function reads as
+
+$γ^{smooth}(x) = γ₀[s(x) + (1-s(x))(1-ϵ)],$
+
+with $s(x)$ being
+
+$s(x) = \Bigg|1 - \left[\frac{1}{2} + \frac{1}{2}\tanh\left(\frac{x - a}{b}\right)\right]\Bigg|,$
+
+where $a$ and $b$ define the intersection point and the smoothing width, respectively.
+For the rest of this notebook we set 
+
+$a=L/2$ 
+
+and will vary $b$."
+
+# ╔═╡ 125d7e66-205c-406d-99da-a24ebd8b6a6d
+γ_names = ["const", "step", "tanh1", "tanh2", "tanh5","tanh10", "tanh20", "tanh50", "tanh100", "tanh200"]
+
+# ╔═╡ 99be3b6d-696e-460f-b327-5fa01c351f7b
+begin 
+	L = 1024
+	γ₀ = 1e-5
+end
 
 # ╔═╡ 3f55eb00-33ef-46df-bb20-a539f41bd31b
 """
@@ -138,41 +181,146 @@ function run_gamma_periodic(
     
 end
 
-# ╔═╡ 88dc323f-f640-4bd8-9db8-7965785663e2
-md"This functions generates a single data set. 
-What is missing is an iteration over different surface tension fields.
-The concrete choice for the spatially resolved surface tension is given by either one of three functions,
+# ╔═╡ 08b46dbc-f255-4818-804f-ec50b1ec030b
+"""
+	const_gamma()
 
-$\gamma^{const.}(x) = \gamma_0$
+Constant surface tension over the whole domain.
+"""
+function const_gamma(;L=L, γ=γ₀)
+    return fill(γ, L)
+end
 
-where γ₀ is a characteristic surface tension value. 
-Besides the constant surface tension, we use a model given by
+# ╔═╡ 51a77e82-dd96-425b-b4db-791fb0547b14
+"""
+	step_gamma()
 
-$\gamma^{heavi}(x) = \begin{cases}\gamma_0\qquad\qquad\text{for x < L/2}\\ \gamma_0(1-\epsilon)\quad \text{else}\end{cases},$
+A step like surface tension field, using the equation below
 
-with a Heaviside step function at the touching point where ϵ is a small deviation and $L$ is the size of the system.
-A third option is given, using a tangent hyperbolicus to smoothen out the discontinuity of the Heaviside function.
-Therefore, the function reads as
+`` \\gamma(x) = \\begin{cases} \\gamma_0\\qquad\\qquad\\text{for}~x < L/2 \\\\ \\gamma_0 - \\frac{2 \\gamma_0}{10}\\quad\\text{else}
+	\\end{cases}
+``
+"""
+function step_gamma(;L=L, γ=γ₀, perc=20)
+    x = ones(L)
+    for i in 1:L
+        if i < L÷2
+            x[i] = γ
+        else
+            x[i] = γ - (γ * perc / 100)
+        end
+    end
+    return x
+end
 
-$γ^{smooth}(x) = γ₀[s(x) + (1-s(x))(1-ϵ)],$
+# ╔═╡ 8dc07f8a-4fc9-4377-8fa7-f1a379e320e0
+"""
+	tanh_gamma()
 
-with $s(x)$ being
+A tangent hyperbolicus to smooth the surface tension step, using the equation
 
-$s(x) = \Bigg|1 - \left[\frac{1}{2} + \frac{1}{2}\tanh\left(\frac{x - a}{b}\right)\right]\Bigg|,$
+`` \\gamma(x) = \\gamma_0\\cdot \\bigg|1 - \\big( \\frac{1}{2} - s(x,l,w) \\big)\\bigg| + ( \\gamma_0 - \\Delta \\gamma) \\bigg[1 - \\bigg|1 - \\big( \\frac{1}{2} - s(x,l,w) \\big) \\bigg| \\bigg]   
+``
+"""
+function tanh_gamma(;L=L, γ=γ₀, perc=20, sl=1)
+    l = collect(1.0:L)
+    function smooth(l, L, sl)
+		return abs.(1 .- (0.5 .+ 0.5 .* tanh.((l .- L÷2) ./ (sl))))
+	end
+	x = ones(L)
+	x .= γ .* smooth(l, L, sl) .+ (1 .- smooth(l, L, sl)) .* (γ - (γ * perc / 100)) 
+	return x
+end
 
-where $a$ and $b$ define the intersection point and the smoothing width, respectively.
-For the rest of this notebook we set 
-
-$a=L/2$ 
-
-and will vary $b$.
-"
-
-# ╔═╡ 125d7e66-205c-406d-99da-a24ebd8b6a6d
-γ_names = ["const", "step", "tanh1", "tanh2", "tanh5","tanh10", "tanh20", "tanh50", "tanh100", "tanh200"]
+# ╔═╡ 996221ff-8bf3-4ba7-abc8-eb33f5184cdd
+@recipe function f(::Type{Val{:samplemarkers}}, x, y, z; step = 10)
+    n = length(y)
+    sx, sy = x[1:step:n], y[1:step:n]
+    # add an empty series with the correct type for legend markers
+    @series begin
+        seriestype := :path
+        markershape --> :auto
+        x := [Inf]
+        y := [Inf]
+    end
+    # add a series for the line
+    @series begin
+        primary := false # no legend entry
+        markershape := :none # ensure no markers
+        seriestype := :path
+        seriescolor := get(plotattributes, :seriescolor, :auto)
+        x := x
+        y := y
+    end
+    # return  a series for the sampled markers
+    primary := false
+    seriestype := :scatter
+    markershape --> :auto
+    x := sx
+    y := sy
+end
 
 # ╔═╡ 1166c2dc-654d-4fc1-8697-8e135a288e05
-md"The above array contains the names of the finite set of surface tension fields we are using, the number behind the tanhX refers to parameter $b$ and therefore the smoothing width."
+md"The above array contains the names of the finite set of surface tension fields we are using, the number behind the tanhX refers to parameter $b$ and therefore the smoothing width.
+
+In the cell below we plot five different surface tension fields to show the above functions"
+
+# ╔═╡ ec669655-6f9a-47a1-a26a-97f2a882cc5a
+begin
+	x_r0 = collect(-511:512) ./ 171
+	# step_gamma(γ=s), tanh_gamma(sl=1, γ=s),
+	Gammas = plot(x_r0, const_gamma(γ=γ₀) ./ const_gamma(γ=γ₀),  label="γ(x) = γ₀",
+		xlabel="x/R₀", ylabel="γ/γ₀",
+		st = :samplemarkers,
+		l=(3),
+		step = 40, 
+		marker = (:circle, 8, 0.6, Plots.stroke(0, :gray)),
+		legendfontsize = 12,		# legend font size
+	    tickfontsize = 14,			# tick font and size
+	    guidefontsize = 15,
+		legend=:bottomleft,
+		grid=false,
+		ylim=(0.78, 1.02))
+	plot!(x_r0, step_gamma(γ=γ₀) ./ const_gamma(γ=γ₀),  label="γ(x) = Θ(x)",
+		st = :samplemarkers,
+		l=(3, :dash),
+		step = 40, 
+		marker = (:d, 8, 0.6, Plots.stroke(0, :gray)))
+	plot!(x_r0, tanh_gamma(γ=γ₀, sl=5) ./ const_gamma(γ=γ₀),  label="γ(x) = s(x;5)",
+		st = :samplemarkers,
+		step = 40, 
+		l=(3, palette(:default)[5], :dashdot),
+		marker = (:hex, 8, palette(:default)[5], 0.6, Plots.stroke(0, :gray)))
+	plot!(x_r0, tanh_gamma(γ=γ₀, sl=100) ./ const_gamma(γ=γ₀),  label="γ(x) = s(x;100)",
+		st = :samplemarkers,
+		l=(3, palette(:default)[9], :dot),
+		step = 40, 
+		marker = (:p, 8, 0.6, palette(:default)[9], Plots.stroke(0, :gray)))
+end
+
+# ╔═╡ 70f3c3ff-26ea-4148-888a-4275d8a6475d
+md"## Film thickness h(x)
+
+Basically everything is set up to work now.
+Let's see what the different suface tension fields do to the thin film.
+
+In the following cells we show three cases with three time steps each, normalized by the inertio capillary time $\tau$.
+First is the coalescence with a constant surface tension.
+"
+
+# ╔═╡ 847063ea-23e3-4fdc-a87c-1cd5a69d60cc
+md"Pretty much as expected, the dip grows without any asymmetry. 
+When we use a sharp surface tension gradient instead we generate the plot below."
+
+# ╔═╡ b8b1bb5c-7a89-458f-b450-58dbb0f3d9ad
+md"Here we clearly see that the coalescence is stopped.
+In fact the droplets had moved away from each other and a somewhat stable two droplet configuration exists.
+If we smear out that surface tension gradient we again see a different behaviour."
+
+# ╔═╡ abd87830-1d06-4c0a-b3c6-d283c762a75f
+md"Now the bridge height is growing with time, similar to our coalescence case.
+But it is not as simple as before. 
+The surface tension gradient generates a Marangoni flow that drives the bridge downstream."
 
 # ╔═╡ 31982c37-8324-4b6e-9bbc-42b8594a90c9
 md"## Data
@@ -184,11 +332,11 @@ Any file that ends with *.jld2* is a data file of a single experiment.
 In this experiments we save the height profile $h(x,t)$ for all $x$ at well defined time intervals.
 For whatever reason it is impossible to save arrays to a *.jld2* file.
 Arrays would be convienent because there are $T\% t_d\times L$ data entries, where $t_d$ is the dumping frequenzy.
-Still what can be done is storing data in dicts and save them to *.jld2* files, therefore every snapshot of the system, all h(x) at some t, are put into a dict with key h_t where t is the time of the snapshot.
+Still what can be done is storing data in dictonaries and save them to *.jld2* files. We get a snapshot of the system, all values of h(x) at some t and put into a dictonary with key `h_t` where t is the time of the snapshot.
 These files are have a rather straightforward API for *DataFrames.jl* which makes postprocessing quite easy.
 
-We then load the files again and have the as a dataframe. 
-These dataframes we ask questions,
+After the simulation has finished and the *.jld2* file is written we load it and import it as dataframe. 
+Now we can ask these dataframes some questions,
 
 1) Which time step are you from
 2) How high is the neck of the liquid bridge
@@ -196,8 +344,10 @@ These dataframes we ask questions,
 4) Is this symmetric or skewed
 
 to name a few and dump every answer into another dataframe.
-The answers to these questions and a few more are stored in the **data** folder in a *.csv* file.
-If for whatever reson someone want to analyse the with *Excel* it would be possible, but it would make me feel physical pain (so please use well cultivated open source software).
+The answers to these questions and a few more are stored in the **data** folder in a *.csv* file, because who doesn't love the *.csv* format.
+If for whatever reson someone want to analyse the *.csv* files with *Excel* it would be possible, but it would hurt me deeply (so please use well cultivated open source software).
+
+Below we can see the content of the *.csv* files.
 "
 
 # ╔═╡ 7bd5733d-ec1a-4fad-a32b-86b295fbb93f
@@ -209,12 +359,12 @@ coalescene_data_hd = CSV.read("..\\data\\coalescence_data_slip_12_gamma0_1e-5_si
 # ╔═╡ f9849f21-02db-4bc6-ac7c-c3470c4d9bf5
 md"## Data analysis
 
-With ``coalescence_data`` we have a list with many entries and lots of numbers.
+With `coalescence_data` we have a list with many entries and lots of numbers.
 What we hope to do now is to make sense of some of these numbers.
 
 Most of these columns are somewhat meaningful, for example the skewness is are measure that can be used right away.
 Some columns however need a little perspective.
-One that is paticular is the time column, because these are lattice Boltzmann time steps.
+One that is paticular is the time column, because these are lattice Boltzmann time steps (shout out to the famous *l.b.u. - lattice boltzmann units*).
 Therefore we are going to normalize them by the inertio-capillary time scale, 
 
 $\tau_{ic} = \sqrt{\frac{\rho r_0^3}{\gamma}},$
@@ -236,6 +386,118 @@ where ``r_0`` is the base radius of the droplet, ``\\rho`` is the liquids densit
 """
 function tau_ic(;ρ=1, r₀=171, γ=1e-5)
 	return sqrt(ρ*r₀^3/γ)
+end
+
+# ╔═╡ 353dc9f9-b8b4-4801-babc-71093c155cfc
+begin
+	tt = tau_ic()
+	go_back = "C:\\Users\\zitz\\Software_Projects\\Swalbe.jl\\data\\Drop_coalescence_long"
+    folder = "\\gamma_10_"
+	times_plot = []
+	surfs = ["const", "tanh5", "tanh100"]
+	snapshots = zeros(1024, 3, 3)
+	for i in enumerate(surfs)
+		for t in enumerate([10000, 10000000, 100000000])
+			push!(times_plot, t[2] / tt)
+			df = load(go_back * folder * "$(i[2])_periodic_tmax_100000000_slip_12_L_1024_hm_12_hc_3_gamma_10.jld2") |> DataFrame
+		snapshots[:, i[1], t[1]] .= df[!, Symbol("h_$(t[2])")]
+		end
+	end
+end
+
+# ╔═╡ 4311720e-cc49-4a1b-80ca-d7b57a32a379
+begin
+	lfs = 14
+	tfs = 18
+	gfs = 20
+	p1 = plot(collect(-511:512) ./ 171, snapshots[:, 1, 1] ./ 171, 
+		annotations = (1.8, 0.23, Plots.text("(a)", 24, :left)),
+		label="t = $(round(times_plot[1],sigdigits=2))τ",
+		xlabel="x/R₀", ylabel="h/R₀",
+		st = :samplemarkers,
+		w=3,
+		step = 40, 
+		marker = (:circle, 8, 0.6, Plots.stroke(0, :gray)),
+		legendfontsize = lfs,		# legend font size
+	    tickfontsize = tfs,			# tick font and size
+	    guidefontsize = gfs,
+		legend=:topleft,
+		grid=false,
+		)
+	plot!(collect(-511:512) ./ 171, snapshots[:, 1, 2] ./ 171, 
+		label="t = $(round(times_plot[2],sigdigits=2))τ",
+		st = :samplemarkers,
+		l=(3, :solid),
+		step = 40, 
+		marker = (:star, 8, 0.6, Plots.stroke(0, :gray)),
+		)
+	plot!(collect(-511:512) ./ 171, snapshots[:, 1, 3] ./ 171, 
+		label="t = $(round(times_plot[3],sigdigits=2))τ",
+		st = :samplemarkers,
+		l=(3, :solid),
+		step = 40, 
+		marker = (:ut, 8, 0.6, Plots.stroke(0, :gray)),
+		)
+	ylims!(0, 0.25)
+	xlims!(-2.1, 2.1)
+end
+
+# ╔═╡ fae4c7c9-15f0-4467-9988-0c159d09481b
+begin
+	p2 = plot(collect(-511:512) ./ 171, snapshots[:, 2, 1] ./ 171,xlabel="x/R₀", 
+			label="",
+		annotations = (1.8, 0.23, Plots.text("(b)", 24, :left)),
+			st=:samplemarkers,
+			l=(3),
+			step = 40, 
+		legendfontsize = lfs,		# legend font size
+	    tickfontsize = tfs,			# tick font and size
+	    guidefontsize = gfs,
+		legend=:topleft,
+		grid=false,
+			marker = (:circle, 8, 0.6, Plots.stroke(0, :gray)))
+		plot!(collect(-511:512) ./ 171, snapshots[:, 2, 2] ./ 171, 
+			label="",
+			st=:samplemarkers,
+			l=(3),
+			step = 40, 
+			marker = (:star, 8, 0.6, Plots.stroke(0, :gray)))
+		plot!(collect(-511:512) ./ 171, snapshots[:, 2, 3] ./ 171, 
+			label="",
+			st=:samplemarkers,
+			l=(3),
+			step = 40, 
+			marker = (:ut, 8, 0.6, Plots.stroke(0, :gray)))
+	ylims!(0, 0.25)
+	xlims!(-2.1, 2.1)
+end
+
+# ╔═╡ 9860aaef-6717-4744-b559-b54c936d80bd
+begin
+	p3 = plot(collect(-511:512) ./ 171, snapshots[:, 3, 1] ./ 171, xlabel="x/R₀",
+		label="",
+		annotations = (1.8, 0.23, Plots.text("(c)", 24, :left)),
+			st=:samplemarkers,
+			l=(3),
+			step = 40, 
+		legendfontsize = lfs,		# legend font size
+	    tickfontsize = tfs,			# tick font and size
+	    guidefontsize = gfs,
+		legend=:topleft,
+		grid=false,
+			marker = (:circle, 8, 0.6, Plots.stroke(0, :gray)))
+		plot!(collect(-511:512) ./ 171, snapshots[:, 3, 2] ./ 171, label="",
+			st=:samplemarkers,
+			l=(3),
+			step = 40, 
+			marker = (:star, 8, 0.6, Plots.stroke(0, :gray)))
+		plot!(collect(-511:512) ./ 171, snapshots[:, 3, 3] ./ 171, label="",
+			st=:samplemarkers,
+			l=(3),
+			step = 40, 
+			marker = (:ut, 8, 0.6, Plots.stroke(0, :gray)))
+	ylims!(0, 0.25)
+	xlims!(-2.1, 2.1)
 end
 
 # ╔═╡ d0c30d75-4e53-401b-82ef-b974d6ad170b
@@ -314,10 +576,11 @@ begin
 end
 
 # ╔═╡ 0e21314c-c763-48da-b1eb-73b4414cba23
-savefig(bridge_plot, "..\\figures\\bridge_evo.svg")
+# Uncomment to save the plot
+#savefig(bridge_plot, "..\\figures\\bridge_evo.svg")
 
 # ╔═╡ fe2fe8ec-31af-4a22-878c-7230c6fa3e84
-md"This data tells us that the droplets nicely coalescing with a powerlaw of α=2/3, at least for a constant surface tension. 
+md"This data tells us that the droplets nicely coalescing with a power-law of α=2/3, at least for a constant surface tension. 
 When we impose a gradient on the substrate the story is different.
 All but the blue circles deviate from the black line
 
@@ -328,53 +591,9 @@ All but the blue circles deviate from the black line
 where β=0.01. 
 "
 
-# ╔═╡ 3eb1f305-2773-47c6-8ee0-a662be6a7d83
-begin
-	asym_const = @subset(coalescene_data, :g_x .== "const").skewness
-	
-	skew_plot = plot(time_exp[log_t], asym_const[log_t], 
-		label=label_dict["const"],
-		ylabel = "μ₃", 
-		xlabel = "t/τ",
-		st = :scatter,
-		xaxis=:log, 
-		l=(3, :auto),
-		grid = false,
-		xticks=([0.001, 0.01, 0.1, 1, 10], ["10⁻³", "10⁻²", "10⁻¹", "10⁰", "10¹"]), # Axis labeling
-		# yticks=([0.001, 0.01, 0.1], ["10⁻³", "10⁻²", "10⁻¹"]), # Axis labeling
-		# yminorticks=10, 
-		legendfontsize = 14,		# legend font size
-    	tickfontsize = 14,			# tick font and size
-    	guidefontsize = 15,
-		legend= :topleft,
-		marker = (:circle, 8, 0.6, Plots.stroke(0, :gray)),
-		)
-
-	plot!(time_exp[log_t], @subset(coalescene_data, :g_x .== "step").skewness[log_t], 
-		label=label_dict["step"],
-		st = :scatter,
-		marker = (:d, 8, 0.6, Plots.stroke(0, :gray)),
-		)
-	plot!(time_exp[log_t], @subset(coalescene_data, :g_x .== "tanh10").skewness[log_t], 
-		label=label_dict["tanh10"],
-		st = :scatter,
-		marker = (:s, 8, 0.6, Plots.stroke(0, :gray)),
-		)
-	plot!(time_exp[log_t], @subset(coalescene_data, :g_x .== "tanh200").skewness[log_t], 
-		label=label_dict["tanh200"],
-		st = :scatter,
-		marker = (:h, 8, 0.6, Plots.stroke(0, :gray)),
-	)
-	lens!([0.8, 3], [-0.02, 0.02], 
-		grid=false, 
-		inset = (1, bbox(0.48, 0.05, 0.4, 0.4)))
-	plot!(xlim=(1e-3, 200))
-end
-
-# ╔═╡ 91023ffe-3ffe-4ab9-a42a-b5cd299214a7
-savefig(skew_plot, "..\\figures\\skew_evo.svg")
-
 # ╔═╡ 4b234890-fb88-4dab-a4e4-88fde788c423
+# ╠═╡ disabled = true
+#=╠═╡
 md"## Theory
 
 The starting point is the thin film equation with the Marangoni term, therefore
@@ -460,6 +679,7 @@ O(h) : \partial_x^2 h\partial_x\gamma, \quad -\gamma\partial_x^3 h
 ```
 "
 
+  ╠═╡ =#
 
 # ╔═╡ aa55506e-2328-484e-a4c7-915f6a08b8b8
 md"First, if disjoining pressure is neglected than only the $O(h^{-1})$ is considered, see Karpitschka and Riegler.
@@ -474,7 +694,6 @@ DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DataFramesMeta = "1313f7d8-7da2-5740-9ea0-a2ca25f37964"
 FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
-LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 Swalbe = "1073fb09-a5e2-4e80-8bde-f3562efda53f"
 
@@ -484,7 +703,6 @@ DataFrames = "~1.3.4"
 DataFramesMeta = "~0.11.0"
 FileIO = "~1.14.0"
 Images = "~0.25.2"
-LaTeXStrings = "~1.3.0"
 Plots = "~1.29.0"
 Swalbe = "~1.0.1"
 """
@@ -2146,26 +2364,40 @@ version = "0.9.1+5"
 # ╟─481914ab-9e8b-4059-8ea3-c39429fe8695
 # ╟─eb737a61-f1ec-428e-b171-653bc4e5e936
 # ╟─94886a7f-fc0e-434e-9338-bb92d5442542
-# ╟─3f55eb00-33ef-46df-bb20-a539f41bd31b
+# ╠═3f55eb00-33ef-46df-bb20-a539f41bd31b
 # ╟─88dc323f-f640-4bd8-9db8-7965785663e2
-# ╠═125d7e66-205c-406d-99da-a24ebd8b6a6d
+# ╟─08b46dbc-f255-4818-804f-ec50b1ec030b
+# ╟─34c92941-5dc5-4fe8-bc27-3712c0bab86b
+# ╟─51a77e82-dd96-425b-b4db-791fb0547b14
+# ╟─d4fbe0fd-9197-48db-9c36-6af49601155b
+# ╟─8dc07f8a-4fc9-4377-8fa7-f1a379e320e0
+# ╟─125d7e66-205c-406d-99da-a24ebd8b6a6d
+# ╟─99be3b6d-696e-460f-b327-5fa01c351f7b
+# ╟─996221ff-8bf3-4ba7-abc8-eb33f5184cdd
 # ╟─1166c2dc-654d-4fc1-8697-8e135a288e05
+# ╟─ec669655-6f9a-47a1-a26a-97f2a882cc5a
+# ╟─70f3c3ff-26ea-4148-888a-4275d8a6475d
+# ╟─353dc9f9-b8b4-4801-babc-71093c155cfc
+# ╟─4311720e-cc49-4a1b-80ca-d7b57a32a379
+# ╟─847063ea-23e3-4fdc-a87c-1cd5a69d60cc
+# ╟─fae4c7c9-15f0-4467-9988-0c159d09481b
+# ╟─b8b1bb5c-7a89-458f-b450-58dbb0f3d9ad
+# ╟─9860aaef-6717-4744-b559-b54c936d80bd
+# ╟─abd87830-1d06-4c0a-b3c6-d283c762a75f
 # ╟─31982c37-8324-4b6e-9bbc-42b8594a90c9
-# ╠═7bd5733d-ec1a-4fad-a32b-86b295fbb93f
-# ╠═047ec01e-2d8f-44e6-a38b-df053f82eb67
+# ╟─7bd5733d-ec1a-4fad-a32b-86b295fbb93f
+# ╟─047ec01e-2d8f-44e6-a38b-df053f82eb67
 # ╟─f9849f21-02db-4bc6-ac7c-c3470c4d9bf5
-# ╠═23623020-3992-499d-aba5-37488b92797f
+# ╟─23623020-3992-499d-aba5-37488b92797f
 # ╟─d0c30d75-4e53-401b-82ef-b974d6ad170b
 # ╠═5053ff78-1a91-4912-9360-ab6e1dbcff61
 # ╟─fda64125-84cf-43cb-9fc9-40fff5144770
 # ╟─5a8e4fd7-4786-4ce4-b1ae-6a6ea645a3a0
 # ╟─9cd40341-6b0c-49f2-9371-ab03e42227d5
-# ╠═4022cd85-8ecf-4781-9c02-66213b544203
+# ╟─4022cd85-8ecf-4781-9c02-66213b544203
 # ╠═0e21314c-c763-48da-b1eb-73b4414cba23
 # ╠═fe2fe8ec-31af-4a22-878c-7230c6fa3e84
-# ╟─3eb1f305-2773-47c6-8ee0-a662be6a7d83
-# ╠═91023ffe-3ffe-4ab9-a42a-b5cd299214a7
-# ╟─4b234890-fb88-4dab-a4e4-88fde788c423
+# ╠═4b234890-fb88-4dab-a4e4-88fde788c423
 # ╟─aa55506e-2328-484e-a4c7-915f6a08b8b8
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

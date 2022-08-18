@@ -229,6 +229,8 @@ begin
 end
 
 # ╔═╡ e2dd8091-3a5e-448c-87df-f8bdc734afdc
+# ╠═╡ disabled = true
+#=╠═╡
 begin
 	plot(@subset(coalescene_data, :g_x .== γ_names[i]).t_norm, #[log_t] 
 		@subset(coalescene_data2, :g_x .== γ_names[i]).drop_diff, 
@@ -280,6 +282,7 @@ begin
 		)
 	plot!(collect(1:0.1:300), 0.2 * collect(1:0.1:300).^(3/4))
 end
+  ╠═╡ =#
 
 # ╔═╡ 8377837a-24b9-47ad-9777-1f9c89c32d41
 # pwd()
@@ -1843,7 +1846,7 @@ version = "0.9.1+5"
 """
 
 # ╔═╡ Cell order:
-# ╟─7ed11bdd-2f22-44a5-94c2-8ef0d841769e
+# ╠═7ed11bdd-2f22-44a5-94c2-8ef0d841769e
 # ╠═50901b90-eb08-11ec-3087-81a949a22d5d
 # ╟─cb1d2d4f-5f05-4fe9-93db-973c9113cf67
 # ╠═ef661fd9-e3c2-4fd3-a36b-75a43222155f
@@ -1859,9 +1862,9 @@ version = "0.9.1+5"
 # ╟─b993564a-077d-47ed-b8b9-6548d2f0fbca
 # ╟─06f3cb7a-544a-4065-85d0-7ffe76cf5105
 # ╟─8c713445-d87a-47e2-a753-e6f6f4812a7a
-# ╟─8ffb2721-e939-45b0-8566-ad8c350a05b4
+# ╠═8ffb2721-e939-45b0-8566-ad8c350a05b4
 # ╠═8707f1b4-8418-4ebc-99e1-b6aba22c25d2
-# ╠═e2dd8091-3a5e-448c-87df-f8bdc734afdc
+# ╟─e2dd8091-3a5e-448c-87df-f8bdc734afdc
 # ╠═8377837a-24b9-47ad-9777-1f9c89c32d41
 # ╟─42dc5c99-1980-421e-b993-2ea92e6fde5c
 # ╠═0c175894-a5dd-4844-af32-e24a2d1dc03a
@@ -1884,9 +1887,9 @@ version = "0.9.1+5"
 # ╠═663f5e86-9008-425f-a1b8-41d0231b1576
 # ╟─57f46a0f-080b-4d14-bdb0-329f04f424c2
 # ╠═4e7a81c7-e8ac-4733-862c-8de6d7589faa
-# ╟─20296440-d014-4ce3-9f56-ab91393f9b9e
-# ╟─2321e432-65be-4df6-80f2-c91eef4e9a84
-# ╟─4a287282-6aae-491e-a8f9-40351b7d8d7c
+# ╠═20296440-d014-4ce3-9f56-ab91393f9b9e
+# ╠═2321e432-65be-4df6-80f2-c91eef4e9a84
+# ╠═4a287282-6aae-491e-a8f9-40351b7d8d7c
 # ╠═22a15d69-4435-48d1-90a8-9187987e49da
 # ╠═bd2b3f2f-cfdf-4ff4-ba59-0353a91f07ea
 # ╠═3cd97467-9991-485b-8e33-a07655038c8e
