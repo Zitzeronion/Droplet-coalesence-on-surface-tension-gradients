@@ -179,6 +179,7 @@ end
 
 # ╔═╡ 8707f1b4-8418-4ebc-99e1-b6aba22c25d2
 begin
+	colors_h = [palette(:default)[5], palette(:default)[6], palette(:default)[7], palette(:default)[8],palette(:default)[9]]
 	hdiff = plot(@subset(coalescene_data, :g_x .== γ_names[i]).t_norm, #[log_t] 
 		@subset(coalescene_data2, :g_x .== γ_names[i]).drop_diff, 
 				label=label_dict[γ_names[i]],
@@ -209,20 +210,20 @@ begin
 		plot!(@subset(coalescene_data, :g_x .== γ_names[k]).t_norm, #[log_t] 
 			@subset(coalescene_data, :g_x .== γ_names[k]).drop_diff, 
 					label=label_dict[γ_names[k]],
-					l = (3, :auto),
+					l = (3, :auto, colors_h[k-4]),
 					st = :samplemarkers, 				# some recipy stuff
 		        	step = 1000,
 					# st = :scatter,
-					marker = (marker_dict[k-1], 8, 0.6, Plots.stroke(0, :gray)),
+					marker = (marker_dict[k-1], colors_h[k-4], 8, 0.6, Plots.stroke(0, :gray)),
 		)
 	end
 	plot!(@subset(coalescene_data, :g_x .== γ_names[8]).t_norm, #[log_t] 
 			@subset(coalescene_data, :g_x .== γ_names[8]).drop_diff, 
 					label=label_dict[γ_names[8]],
-					l = (3, :auto),
+					l = (3, :auto, colors_h[4]),
 					st = :samplemarkers, 				# some recipy stuff
 		        	step = 1000,
-					marker = (marker_dict[8], 8, 0.6, Plots.stroke(0, :gray)),
+					marker = (:dt, colors_h[4], 8, 0.6, Plots.stroke(0, :gray)),
 					# ylims=(1e-3, 100)
 		)
 end
@@ -282,7 +283,7 @@ end
 
 # ╔═╡ 8377837a-24b9-47ad-9777-1f9c89c32d41
 # pwd()
-# savefig(hdiff, "..\\figures\\hdiff.svg")
+savefig(hdiff, "..\\figures\\hdiff.svg")
 
 # ╔═╡ 42dc5c99-1980-421e-b993-2ea92e6fde5c
 md"### Separation time
@@ -327,23 +328,24 @@ begin
 		xlabel = "w/R₀",
 		ylabel = "t/τ",
 		grid=:false,
-		label="τₛ",
-		marker = (:circle, 8, 0.6, Plots.stroke(0, :gray)),
-		legendfontsize = 12,		# legend font size
-    	tickfontsize = 14,			# tick font and size
-    	guidefontsize = 15,
+		label="",
+		marker = (:circle, 30, 0.6, Plots.stroke(0, :gray)),
+		xticks = ([0.00, 0.04, 0.08, 0.12], ["0.00", "0.04", "0.08", "0.12"]),
+		legendfontsize = 20,		# legend font size
+    	tickfontsize = 18,			# tick font and size
+    	guidefontsize = 20,
 		legend=:topleft,
 		xlims=(0,0.13),
 		ylims=(0,80),
 		)
 	data_x = collect(0:0.001:1)
 	Δγ = 8e-6
-	plot!(data_x , data_x.^(3/2) .* 1700, l=(3, :dash, :black), label="∝εw^(3/2)")
+	plot!(data_x , data_x.^(3/2) .* 1700, l=(5, :dash, :black), label="")
 	# plot!(data_x , data_x.^2 ./ (22*Δγ), l=(3, :dash, :gray), label="w²/(2(γ₀-Δγ)")
 end
 
 # ╔═╡ ba644615-6717-4598-81cc-b8484e5f4855
-# savefig(tau_sep, "..\\figures\\tausep_6over5.svg")
+savefig(tau_sep, "..\\figures\\seperation_time_scaling.svg")
 
 # ╔═╡ e6a1d40d-3ae1-4608-9788-e6a149d8f283
 md"What is interesting in this plot is the linear depenedency on the smearing width.
@@ -486,7 +488,7 @@ begin
 			pressure_data[(pressure_data.kind .== "lap") .& (pressure_data.time .== 100000000) .& (pressure_data.gamma .== i[2]), :pressure],
 			l=(3, :solid, ci[i[1]]),
 			label="$(label_dict[i[2]])",
-			xlabel="l/R",
+			xlabel="x/R₀",
 			ylabel="P/p₀",
 			st = :samplemarkers, 				# some recipy stuff
 			step = 11, 
@@ -508,13 +510,11 @@ begin
 	end
 	# lens!([-0.15,0.85], [-1.5, 1.5], inset = (1, bbox(0.1, 0.2, 0.4, 0.4)))
 	plot!(xlims=(-0.85, 0.65))
+	lens!([-0.15,0.85], [-0.5, 0.5], grid=false, inset = (1, bbox(0.1, 0.2, 0.4, 0.4)))
 end
 
-# ╔═╡ 94a0e918-53e0-4348-b577-f331ea211cfa
-lens!([-0.15,0.85], [-1.5, 1.5], grid=false, inset = (1, bbox(0.1, 0.2, 0.4, 0.4)))
-
 # ╔═╡ a30ea74e-3614-4eb8-91f4-5d89a0f2f73c
-# savefig("..\\Figures\\pressures_diff_gam.svg")
+savefig(pressure_plot, "..\\Figures\\pressures_diff_gam.svg")
 
 # ╔═╡ d3e3929c-97e5-4635-ad25-54ea87c24c82
 md"## Interfaces
@@ -528,46 +528,123 @@ We know there is about three different scenarios
 
 # ╔═╡ 4eb19849-a429-4a69-a382-f4e04e706105
 begin
+	tt = tau_ic()
 	go_back = "C:\\Users\\zitz\\Software_Projects\\Swalbe.jl\\data\\Drop_coalescence_long"
     folder = "\\gamma_10_"
+	times_plot = []
 	surfs = ["const", "tanh5", "tanh100"]
-	snapshots = zeros(1024, 3)
+	snapshots = zeros(1024, 3, 3)
 	for i in enumerate(surfs)
-		df = load(go_back * folder * "$(i[2])_periodic_tmax_100000000_slip_12_L_1024_hm_12_hc_3_gamma_10.jld2") |> DataFrame
-		snapshots[:, i[1]] .= df.h_100000000
+		for t in enumerate([10000, 10000000, 100000000])
+			push!(times_plot, t[2] / tt)
+			df = load(go_back * folder * "$(i[2])_periodic_tmax_100000000_slip_12_L_1024_hm_12_hc_3_gamma_10.jld2") |> DataFrame
+		snapshots[:, i[1], t[1]] .= df[!, Symbol("h_$(t[2])")]
+		end
 	end
 end
 
 # ╔═╡ 6e01e3cf-1f51-4cff-a87c-0c8c524d415a
 begin
-	final_h = plot(collect(-511:512) ./ 171, snapshots[:, 1] ./ 171, label="γ(x) = γ₀",
+	lfs = 14
+	tfs = 18
+	gfs = 20
+	p1 = plot(collect(-511:512) ./ 171, snapshots[:, 1, 1] ./ 171, 
+		annotations = (1.8, 0.23, Plots.text("(a)", 24, :left)),
+		label="t = $(round(times_plot[1],sigdigits=2))τ",
 		xlabel="x/R₀", ylabel="h/R₀",
 		st = :samplemarkers,
 		w=3,
+		c=ci[1],
 		step = 40, 
-		marker = (:circle, 8, 0.6, Plots.stroke(0, :gray)),
-		legendfontsize = 12,		# legend font size
-	    tickfontsize = 14,			# tick font and size
-	    guidefontsize = 15,
-		legend=:best,
+		marker = (:circle, 8, 0.6, Plots.stroke(0, :gray), ci[1]),
+		legendfontsize = lfs,		# legend font size
+	    tickfontsize = tfs,			# tick font and size
+	    guidefontsize = gfs,
+		legend=:topleft,
 		grid=false,
 		)
-	plot!(collect(-511:512) ./ 171, snapshots[:, 2] ./ 171, 
-		label="γ(x) = s(x;5)",
-		st=:samplemarkers,
-		l=(3, :dash),
+	plot!(collect(-511:512) ./ 171, snapshots[:, 1, 2] ./ 171, 
+		label="t = $(round(times_plot[2],sigdigits=2))τ",
+		st = :samplemarkers,
+		l=(3, :solid, ci[1]),
 		step = 40, 
-		marker = (:star, 8, 0.6, Plots.stroke(0, :gray)))
-	plot!(collect(-511:512) ./ 171, snapshots[:, 3] ./ 171, label="γ(x) = s(x;100)",
-		st=:samplemarkers,
-		l=(3, :dashdot),
+		marker = (:star, 8, 0.6, Plots.stroke(0, :gray), ci[1]),
+		)
+	plot!(collect(-511:512) ./ 171, snapshots[:, 1, 3] ./ 171, 
+		label="t = $(round(times_plot[3],sigdigits=2))τ",
+		st = :samplemarkers,
+		l=(3, :solid, ci[1]),
 		step = 40, 
-		marker = (:ut, 8, 0.6, Plots.stroke(0, :gray)))
-	plot!(ylims=(0, 0.25), xlims=(-3.0, 3.0))
+		marker = (:ut, 8, 0.6, Plots.stroke(0, :gray), ci[1]),
+		)
+	ylims!(0, 0.25)
+	xlims!(-2.1, 2.1)
+end
+
+# ╔═╡ 02fad95f-1e0f-4444-9a31-6b6aedd299fe
+begin
+	p2 = plot(collect(-511:512) ./ 171, snapshots[:, 2, 1] ./ 171,xlabel="x/R₀", 
+			label="",
+		annotations = (1.8, 0.23, Plots.text("(b)", 24, :left)),
+			st=:samplemarkers,
+			l=(3, ci[2]),
+			step = 40, 
+		legendfontsize = lfs,		# legend font size
+	    tickfontsize = tfs,			# tick font and size
+	    guidefontsize = gfs,
+		legend=:topleft,
+		grid=false,
+			marker = (:circle, 8, 0.6, Plots.stroke(0, :gray), ci[2]))
+		plot!(collect(-511:512) ./ 171, snapshots[:, 2, 2] ./ 171, 
+			label="",
+			st=:samplemarkers,
+			l=(3, ci[2]),
+			step = 40, 
+			marker = (:star, 8, 0.6, Plots.stroke(0, :gray), ci[2]))
+		plot!(collect(-511:512) ./ 171, snapshots[:, 2, 3] ./ 171, 
+			label="",
+			st=:samplemarkers,
+			l=(3, ci[2]),
+			step = 40, 
+			marker = (:ut, 8, 0.6, Plots.stroke(0, :gray), ci[2]))
+	ylims!(0, 0.25)
+	xlims!(-2.1, 2.1)
+end
+
+# ╔═╡ b8fd374a-ec9d-4f65-97e4-d02c77ff57ea
+begin
+	p3 = plot(collect(-511:512) ./ 171, snapshots[:, 3, 1] ./ 171, xlabel="x/R₀",
+		label="",
+		annotations = (1.8, 0.23, Plots.text("(c)", 24, :left)),
+			st=:samplemarkers,
+			l=(3, ci[3]),
+			step = 40, 
+		legendfontsize = lfs,		# legend font size
+	    tickfontsize = tfs,			# tick font and size
+	    guidefontsize = gfs,
+		legend=:topleft,
+		grid=false,
+			marker = (:circle, 8, 0.6, Plots.stroke(0, :gray), ci[3]))
+		plot!(collect(-511:512) ./ 171, snapshots[:, 3, 2] ./ 171, label="",
+			st=:samplemarkers,
+			l=(3, ci[3]),
+			step = 40, 
+			marker = (:star, 8, 0.6, Plots.stroke(0, :gray), ci[3]))
+		plot!(collect(-511:512) ./ 171, snapshots[:, 3, 3] ./ 171, label="",
+			st=:samplemarkers,
+			l=(3, ci[3]),
+			step = 40, 
+			marker = (:ut, 8, 0.6, Plots.stroke(0, :gray), ci[3]))
+	ylims!(0, 0.25)
+	xlims!(-2.1, 2.1)
 end
 
 # ╔═╡ 663f5e86-9008-425f-a1b8-41d0231b1576
-savefig( final_h, "..\\Figures\\h_final_three.svg")
+begin
+	savefig(p1, "..\\Figures\\h_final_three_1.svg")
+	savefig(p2, "..\\Figures\\h_final_three_2.svg")
+	savefig(p3, "..\\Figures\\h_final_three_3.svg")
+end
 
 # ╔═╡ 57f46a0f-080b-4d14-bdb0-329f04f424c2
 md"## Surface tension fields
@@ -645,7 +722,7 @@ begin
 	Gammas = plot(x_r0, const_gamma(γ=γ₀) ./ const_gamma(γ=γ₀),  label="γ(x) = γ₀",
 		xlabel="x/R₀", ylabel="γ/γ₀",
 		st = :samplemarkers,
-		w=3,
+		l=(3),
 		step = 40, 
 		marker = (:circle, 8, 0.6, Plots.stroke(0, :gray)),
 		legendfontsize = 12,		# legend font size
@@ -656,23 +733,23 @@ begin
 		ylim=(0.78, 1.02))
 	plot!(x_r0, step_gamma(γ=γ₀) ./ const_gamma(γ=γ₀),  label="γ(x) = Θ(x)",
 		st = :samplemarkers,
-		w=3,
+		l=(3, :dash),
 		step = 40, 
-		marker = (:star, 8, 0.6, Plots.stroke(0, :gray)))
+		marker = (:d, 8, 0.6, Plots.stroke(0, :gray)))
 	plot!(x_r0, tanh_gamma(γ=γ₀, sl=5) ./ const_gamma(γ=γ₀),  label="γ(x) = s(x;5)",
 		st = :samplemarkers,
-		w=3,
 		step = 40, 
-		marker = (:ut, 8, 0.6, Plots.stroke(0, :gray)))
+		l=(3, palette(:default)[5], :dashdot),
+		marker = (:hex, 8, palette(:default)[5], 0.6, Plots.stroke(0, :gray)))
 	plot!(x_r0, tanh_gamma(γ=γ₀, sl=100) ./ const_gamma(γ=γ₀),  label="γ(x) = s(x;100)",
 		st = :samplemarkers,
-		w=3,
+		l=(3, palette(:default)[9], :dot),
 		step = 40, 
-		marker = (:rect, 8, 0.6, Plots.stroke(0, :gray)))
+		marker = (:p, 8, 0.6, palette(:default)[9], Plots.stroke(0, :gray)))
 end
 
 # ╔═╡ bd2b3f2f-cfdf-4ff4-ba59-0353a91f07ea
-# savefig(Gammas, "..\\Figures\\gammas.svg")
+savefig(Gammas, "..\\Figures\\gammas.svg")
 
 # ╔═╡ 3cd97467-9991-485b-8e33-a07655038c8e
 begin
@@ -1785,7 +1862,7 @@ version = "0.9.1+5"
 # ╟─8ffb2721-e939-45b0-8566-ad8c350a05b4
 # ╠═8707f1b4-8418-4ebc-99e1-b6aba22c25d2
 # ╠═e2dd8091-3a5e-448c-87df-f8bdc734afdc
-# ╟─8377837a-24b9-47ad-9777-1f9c89c32d41
+# ╠═8377837a-24b9-47ad-9777-1f9c89c32d41
 # ╟─42dc5c99-1980-421e-b993-2ea92e6fde5c
 # ╠═0c175894-a5dd-4844-af32-e24a2d1dc03a
 # ╠═a2ed13b5-84db-4f02-bd6d-39f39ba5642c
@@ -1798,11 +1875,12 @@ version = "0.9.1+5"
 # ╟─c02d1b7a-b8f8-457c-96f2-383a6422a36d
 # ╠═ff16591c-26a8-4330-96d8-dd807b5bc9fb
 # ╠═7a244fc8-a74d-4e12-892e-570cef474bca
-# ╠═94a0e918-53e0-4348-b577-f331ea211cfa
 # ╠═a30ea74e-3614-4eb8-91f4-5d89a0f2f73c
 # ╟─d3e3929c-97e5-4635-ad25-54ea87c24c82
 # ╠═4eb19849-a429-4a69-a382-f4e04e706105
 # ╠═6e01e3cf-1f51-4cff-a87c-0c8c524d415a
+# ╠═02fad95f-1e0f-4444-9a31-6b6aedd299fe
+# ╠═b8fd374a-ec9d-4f65-97e4-d02c77ff57ea
 # ╠═663f5e86-9008-425f-a1b8-41d0231b1576
 # ╟─57f46a0f-080b-4d14-bdb0-329f04f424c2
 # ╠═4e7a81c7-e8ac-4733-862c-8de6d7589faa
