@@ -5,7 +5,7 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ 068a4181-e557-455b-8dc2-944ecf8e5636
-using Plots, DataFrames, FileIO, DataFramesMeta, CSV, Images, Swalbe
+using Plots, DataFrames, FileIO, DataFramesMeta, HTTP, CSV, Images, Swalbe
 
 # ╔═╡ 71f76f00-d766-11ec-2cbe-85a9418b83a3
 md"# To coalesce or not to coalesce
@@ -45,8 +45,69 @@ What we will discuss is the case in between simple coalescence and sharp concent
 - No gradient : $h_0(t) \propto t^{2/3}$ 
 - A sharp gradient: $h_0(t) = const$ 
 - A smooth gradient: $h_0(t) = ?$
+"
 
-## Numerical setup
+# ╔═╡ 4b234890-fb88-4dab-a4e4-88fde788c423
+md"## Theory
+
+The starting point is the thin film equation with the Marangoni term, therefore
+
+```math
+\partial_t h = \partial_x \bigg(\frac{h^3}{3\mu}\partial_x p + \frac{h^2}{2\mu}\partial_x\gamma\bigg).
+```
+The coalescence is driven by pressure.
+Pressure that is generated due to capillarity,
+```math
+P_{cap} = \gamma\kappa,
+```
+therefore surface tension times the curvature of the liquid vapor interface.
+This pressure induces a dynamic pressure which is resulting in a flow towards the neck, a Bernoulli pressure if you want
+```math
+P_B = \rho u^2 = \rho \bigg(\frac{h_0}{t}\bigg)^2,
+```
+without being to specific about $t$ for now.
+
+Requiring both pressures are equal we have
+```math
+P_B = P_{cap} = \rho \bigg(\frac{h_0}{t}\bigg)^2 = \gamma\kappa = \frac{\gamma}{h_0}, 
+```
+where we assume that the radius of curvature is similar to the height of the bridge.
+Solving this for $h_0$ we get
+```math
+h_0 = \bigg(\frac{\gamma}{\rho}\bigg)^{1/3}t^{2/3},
+```
+which explains the $h_0 \sim t^{2/3}$ powerlaw we were looking for.
+
+Now for the twin droplet case we have to work a bit.
+One crude but somewhat legite assumption is that the shape is constant.
+Meaning,
+```math
+\partial_t h = 0.
+```
+Thus the thin film equation becomes
+```math
+0 = \partial_x \bigg(\frac{h^3}{3\mu}\partial_x p + \frac{h^2}{2\mu}\partial_x\gamma\bigg).
+```
+From Oron et al we know that the velocity of a film is given by
+```math
+u(z) = \frac{z}{\mu}\left[\partial_x\gamma - \left(\frac{z}{2} - h\right)\gamma\partial_x^3 h\right],
+```
+therefore the only new result we are looking for is $\partial_x^3 h$
+```math
+\partial_x^3 h \approx \frac{3}{h^2}Ca - \frac{3}{2h\gamma}\partial_x\gamma - \partial_x\Pi(h),
+```
+with the addition of a disjoining pressure term.
+Karptischka et al. showed that using the above velocity equation without disjoining pressure leads to a moving but stable twin droplet state, therefore
+```math
+h_0(t)\sim h_0(0).
+```
+Will the disjoining pressure alter this result?
+Let's find out in the remainder of the notebook.
+"
+
+
+# ╔═╡ 89211020-0567-4e89-aa1e-27d59f1ebcf6
+md"## Numerical setup
 
 Simulations or numerical experiments are performed using the solver *[Swalbe.jl](https://github.com/Zitzeronion/Swalbe.jl)* (using the surface_tension_gradient branch).
 As of now these simulations are work in progress and surface tension gardients are not yet part of the master branch.
@@ -351,10 +412,10 @@ Below we can see the content of the *.csv* files.
 "
 
 # ╔═╡ 7bd5733d-ec1a-4fad-a32b-86b295fbb93f
-coalescene_data = CSV.read("..\\data\\coalescence_data_slip_12_gamma0_1e-5_hmin_012.csv", DataFrame)
+coalescene_data = CSV.read(HTTP.get("https://raw.githubusercontent.com/Zitzeronion/TimeDepWettabilityPaper/Drop_coalescence/Data_CSV/coalescence_data_slip_12_gamma0_1e-5_sim.csv").body, DataFrame)
 
 # ╔═╡ 047ec01e-2d8f-44e6-a38b-df053f82eb67
-coalescene_data_hd = CSV.read("..\\data\\coalescence_data_slip_12_gamma0_1e-5_sim.csv", DataFrame)
+coalescene_data2 = CSV.read(HTTP.get("https://raw.githubusercontent.com/Zitzeronion/TimeDepWettabilityPaper/Drop_coalescence/Data_CSV/coalescence_data_slip_12_gamma0_1e-5_hmin_012.csv").body, DataFrame)
 
 # ╔═╡ f9849f21-02db-4bc6-ac7c-c3470c4d9bf5
 md"## Data analysis
@@ -410,7 +471,8 @@ begin
 	lfs = 14
 	tfs = 18
 	gfs = 20
-	p1 = plot(collect(-511:512) ./ 171, snapshots[:, 1, 1] ./ 171, 
+	p1 = plot(collect(-511:512) ./ 171, snapshots[:, 1, 1] ./ 171,
+		title = "γ(x) = γ₀",
 		annotations = (1.8, 0.23, Plots.text("(a)", 24, :left)),
 		label="t = $(round(times_plot[1],sigdigits=2))τ",
 		xlabel="x/R₀", ylabel="h/R₀",
@@ -445,7 +507,8 @@ end
 # ╔═╡ fae4c7c9-15f0-4467-9988-0c159d09481b
 begin
 	p2 = plot(collect(-511:512) ./ 171, snapshots[:, 2, 1] ./ 171,xlabel="x/R₀", 
-			label="",
+			title = "γ(x) = Θ(x)",
+		label="",
 		annotations = (1.8, 0.23, Plots.text("(b)", 24, :left)),
 			st=:samplemarkers,
 			l=(3),
@@ -475,6 +538,7 @@ end
 # ╔═╡ 9860aaef-6717-4744-b559-b54c936d80bd
 begin
 	p3 = plot(collect(-511:512) ./ 171, snapshots[:, 3, 1] ./ 171, xlabel="x/R₀",
+		title = "γ(x) ∼ tanh(x)",
 		label="",
 		annotations = (1.8, 0.23, Plots.text("(c)", 24, :left)),
 			st=:samplemarkers,
@@ -581,110 +645,103 @@ end
 
 # ╔═╡ fe2fe8ec-31af-4a22-878c-7230c6fa3e84
 md"This data tells us that the droplets nicely coalescing with a power-law of α=2/3, at least for a constant surface tension. 
-When we impose a gradient on the substrate the story is different.
-All but the blue circles deviate from the black line
-
+The black dashed line shows this power-law and is computed according to
 ```math
 	f(t) = \beta\cdot t^{2/3},
 ```
+where β=0.01.
 
-where β=0.01. 
+In the very late time stages of the simulation the blue bullets start to deviate, this is somewhat expected.
+The bridge is at this point of similar height as the initial droplets.
+
+For the other symbols the story is a little more complex.
+However one very interesting observation is the fact that most of them have some intermediate overlap with the black dashed line.
+At some point the bridge height $h_0$ reach a maximum and then quickly drops in height.
+The height becomes even smaller than the initial imposed one.
+This is what we call **droplet separation** and we are now interested in what time scale this separation process has.
 "
 
-# ╔═╡ 4b234890-fb88-4dab-a4e4-88fde788c423
-# ╠═╡ disabled = true
-#=╠═╡
-md"## Theory
+# ╔═╡ c03e49c3-f9f3-4e42-b1ac-ece4f425669a
+md"### Separation time
 
-The starting point is the thin film equation with the Marangoni term, therefore
+One further question we can ask the data is when the droplets separate.
+The separation can be defined using
+```math
+	\min_t(h_0) \leq h_{\ast},
+```
+where $h_{\ast}$ is the height that we identify as *dry* spot.
+For mostly technical reasons the height can not go truely to 0.
+Leaving this technicality aside when $h_0(t) \leq h_{\ast}$ we assume the droplets are separated. 
 
-```math
-\partial_t h = \partial_x \bigg(\frac{h^3}{3\mu}\partial_x p + \frac{h^2}{2\mu}\partial_x\gamma\bigg).
-```
-The coalescence is driven by pressure.
-Pressure that is generated due to capillarity,
-```math
-P_{cap} = \gamma\kappa,
-```
-therefore surface tension times the curvature of the liquid vapor interface.
-This pressure induces a dynamic pressure which is resulting in a flow towards the neck, a Bernulli pressure if you want
-```math
-P_B = \rho u^2 = \rho \bigg(\frac{h_0}{t}\bigg)^2,
-```
-without being to specific about $t$ for now.
+This only happens in a few of our simulations, in fact only for $w<50$.
+Which in fact has to reasons 
+1. We set a maximal simulation time.
+2. If the smearing becomes too large we have an asymmetric coalescence.
 
-Requiring both pressures are equal we have
-```math
-P_B = P_{cap} = \rho \bigg(\frac{h_0}{t}\bigg)^2 = \gamma\kappa = \frac{\gamma}{h_0}, 
-```
-where we assume that the radius of curvature is similar to the height of the bridge.
-Solving this for $h_0$ we get
-```math
-h_0 = \bigg(\frac{\gamma}{\rho}\bigg)^{1/3}t^{2/3},
-```
-which explains the $t^{2/3}$ powerlaw we were looking for.
-
-Now for the twin droplet case we have to work a bit.
-One crude but somewhat legite assumption is that the shape is constant.
-Meaning,
-```math
-\partial_t h = 0.
-```
-Thus the thin film equation becomes
-```math
-0 = \partial_x \bigg(\frac{h^3}{3\mu}\partial_x p + \frac{h^2}{2\mu}\partial_x\gamma\bigg).
-```
-In the next step we integrate both sides and have the seemingly simple equation
-```math
-0 = \frac{h^3}{3\mu}\partial_x p + \frac{h^2}{2\mu}\partial_x\gamma,
-```
-which we can solve straight for $p$
-```math
-\partial_x p = -\frac{3}{2 h}\partial_x\gamma.
-```
-Inserting the pressure we use for our numerical experiments we have,
-```math
-\partial_x[-\gamma\partial_x^2 h - \Pi(h)] = -\frac{3}{2 h}\partial_x\gamma,
-```
-and after some calculus
-```math
--\partial_x\gamma\partial_x^2 h - \gamma\partial_x^3 h - \partial_x\Pi(h) = -\frac{3}{2 h}\partial_x\gamma.
-```
-For the disjoining pressure $\Pi(h)$ we use a seperation of variables, therefore
-```math
-\Pi(h) = K(\gamma)H(h),\quad K(\gamma)\propto \gamma(1-cos(\theta)), \quad H(h) \propto \bigg(\frac{h_{\ast}}{h}\bigg)^9 - \bigg(\frac{h_{\ast}}{h}\bigg)^3,
-```
-for which we can use 
-```math
-\partial_x K(\gamma) = \frac{K(\gamma)}{\gamma}\partial_x\gamma,\quad \partial_x H(h) = \partial_h H(h)\partial_x h.
-```
-Inserting these relation we have 
-```math
--\partial_x\gamma\partial_x^2 h - \gamma\partial_x^3 h - \frac{K(\gamma)}{\gamma}\partial_x\gamma H(h) - K(\gamma)\partial_h H(h)\partial_x h= -\frac{3}{2 h}\partial_x\gamma.
-```
-Just keeping the $\partial_x^3 h$ term on the left hand side and collecting all $\partial_x\gamma$ terms
-```math
-- \gamma\partial_x^3 h = \bigg[-\frac{3}{2 h}\partial_x\gamma + \partial_x^2 h + H(h) \frac{K(\gamma)}{\gamma}\bigg]\partial_x\gamma + K(\gamma)\partial_h H(h)\partial_x h.
-```
-Solving this is possible but probably no fun.
-Instead lets try to get an understanding for the scaling and see which terms is of which order in $h$
-```math 
-O(h^{-9}) : \frac{K(\gamma)H(h)}{\gamma}\partial_x\gamma,\quad K(\gamma)\partial_hH(h)\partial_xh
-```
-```math
-O(h^{-1}) : -\frac{3}{2h}\partial_x\gamma
-```
-```math
-O(h) : \partial_x^2 h\partial_x\gamma, \quad -\gamma\partial_x^3 h 
-```
+That is why the plot only shows a subset of smearing widths.
 "
-
-  ╠═╡ =#
 
 # ╔═╡ aa55506e-2328-484e-a4c7-915f6a08b8b8
-md"First, if disjoining pressure is neglected than only the $O(h^{-1})$ is considered, see Karpitschka and Riegler.
-If we however keep the disjoining pressure than we have two terms that scale with $O(h^{-9})$, which quite a large power.
-"
+begin
+	sep_time = Float64[]
+	gamma_n = Int[]
+	for i in γ_names[3:end]
+		one_gamma = @subset(coalescene_data, :g_x .== i)
+		if minimum(one_gamma.bridge_min) < 0.09
+			# println("Hello, $i")
+			push!(sep_time, first(one_gamma[one_gamma.bridge_min .≤ 0.09, :t_norm]))
+		else
+			push!(sep_time, 200)
+		end
+		# println(first(one_gamma[one_gamma.bridge_min .≤ 0.09, :t_norm]))
+		# println(i[5:end])
+		push!(gamma_n, parse(Int, i[5:end]))
+	end
+	
+end
+
+# ╔═╡ 3ee0f7fd-8acb-41c6-b8c1-392cb1a08fb8
+begin
+tau_sep = plot(gamma_n[1:5] ./ 171, sep_time[1:5],
+		st = :scatter,
+		xlabel = "w/R₀",
+		ylabel = "t/τ",
+		grid=:false,
+		label="",
+		marker = (:circle, 30, 0.6, Plots.stroke(0, :gray)),
+		xticks = ([0.00, 0.04, 0.08, 0.12], ["0.00", "0.04", "0.08", "0.12"]),
+		legendfontsize = 20,		# legend font size
+    	tickfontsize = 18,			# tick font and size
+    	guidefontsize = 20,
+		legend=:topleft,
+		xlims=(0,0.13),
+		ylims=(0,80),
+		)
+	data_x = collect(0:0.001:1)
+	Δγ = 8e-6
+	plot!(data_x , data_x.^(3/2) .* 1700, l=(5, :dash, :black), label="")
+	# plot!(data_x , data_x.^2 ./ (22*Δγ), l=(3, :dash, :gray), label="w²/(2(γ₀-Δγ)")
+end
+
+# ╔═╡ db2ca048-cb1f-4f0d-93db-6dd808cff6f1
+md"The blue bullets are data, so what is the black dashed line?
+
+Good question!
+If we assume that the separation happens at a balance of velcoties and we know it is driven by Marangoni that we can do the following
+```math
+\frac{\gamma}{\mu} \sim \frac{h_0}{2\mu}\partial_x\gamma,
+```
+where the left hand side is a substance specific capillary velocity and the right hand side is a Marangoni velocity.
+Now we put $h_0$ on one side and all other contributions on the other side,
+```math
+h_0 \sim \frac{2\gamma}{(\Delta\gamma)}w,
+```
+and as mentioned before most of the data to some degree overlaps with $t^{2/3}$ so,
+```math
+\tau_r \sim \sqrt{\frac{8\gamma^3}{(\Delta\gamma)^3}w^3},
+```
+and the black line shows, $f(x) = j w^{3/2}$.
+" 
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -693,6 +750,7 @@ CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DataFramesMeta = "1313f7d8-7da2-5740-9ea0-a2ca25f37964"
 FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
+HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
 Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 Swalbe = "1073fb09-a5e2-4e80-8bde-f3562efda53f"
@@ -702,6 +760,7 @@ CSV = "~0.10.4"
 DataFrames = "~1.3.4"
 DataFramesMeta = "~0.11.0"
 FileIO = "~1.14.0"
+HTTP = "~0.9.17"
 Images = "~0.25.2"
 Plots = "~1.29.0"
 Swalbe = "~1.0.1"
@@ -2362,6 +2421,8 @@ version = "0.9.1+5"
 # ╟─71f76f00-d766-11ec-2cbe-85a9418b83a3
 # ╠═068a4181-e557-455b-8dc2-944ecf8e5636
 # ╟─481914ab-9e8b-4059-8ea3-c39429fe8695
+# ╟─4b234890-fb88-4dab-a4e4-88fde788c423
+# ╟─89211020-0567-4e89-aa1e-27d59f1ebcf6
 # ╟─eb737a61-f1ec-428e-b171-653bc4e5e936
 # ╟─94886a7f-fc0e-434e-9338-bb92d5442542
 # ╠═3f55eb00-33ef-46df-bb20-a539f41bd31b
@@ -2396,8 +2457,10 @@ version = "0.9.1+5"
 # ╟─9cd40341-6b0c-49f2-9371-ab03e42227d5
 # ╟─4022cd85-8ecf-4781-9c02-66213b544203
 # ╠═0e21314c-c763-48da-b1eb-73b4414cba23
-# ╠═fe2fe8ec-31af-4a22-878c-7230c6fa3e84
-# ╠═4b234890-fb88-4dab-a4e4-88fde788c423
+# ╟─fe2fe8ec-31af-4a22-878c-7230c6fa3e84
+# ╟─c03e49c3-f9f3-4e42-b1ac-ece4f425669a
 # ╟─aa55506e-2328-484e-a4c7-915f6a08b8b8
+# ╟─3ee0f7fd-8acb-41c6-b8c1-392cb1a08fb8
+# ╠═db2ca048-cb1f-4f0d-93db-6dd808cff6f1
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
