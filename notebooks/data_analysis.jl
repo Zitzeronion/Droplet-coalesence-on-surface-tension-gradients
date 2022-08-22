@@ -600,6 +600,8 @@ md"Basically a lot of try and error led to the above `log_t` array.
 
 Using this array to display the data in a loglog plot can be seen in the figure below.
 Here we finally plot the growth of the liquid bridge for different surface tension fields.
+
+### Bridge height - growth law
 " 
 
 # ╔═╡ 4022cd85-8ecf-4781-9c02-66213b544203
@@ -736,12 +738,177 @@ Now we put $h_0$ on one side and all other contributions on the other side,
 ```math
 h_0 \sim \frac{2\gamma}{(\Delta\gamma)}w,
 ```
-and as mentioned before most of the data to some degree overlaps with $t^{2/3}$ so,
+and as mentioned before most of the data, to some degree, overlaps with $h\_0 \sim t^{2/3}$ so,
 ```math
 \tau_r \sim \sqrt{\frac{8\gamma^3}{(\Delta\gamma)^3}w^3},
 ```
-and the black line shows, $f(x) = j w^{3/2}$.
+where we named time scale $t \rightarrow \tau_r$. 
+Additionally we show in black the power-law $f(x) = j w^{3/2}$, with $j$ being some constant.
+
+To understand this relation we did a little more diggin in our data.
+
+### Droplet height difference
+
+First we wanted to know if we can combine the droplet growth and shrinking with the separation time.
+For that we computed $\Delta h$:  
+```math
+	\Delta h = h_d^l - h_d^r,
+```
+where $r$ and $l$ refer to the left and right droplet.
 " 
+
+# ╔═╡ e5a289a4-c4d3-475c-a455-8fe72f1971a8
+begin
+	# First add another column for the drop height difference 
+	coalescene_data[!, "drop_diff"] .= abs.(coalescene_data.height_droplet_left .- coalescene_data.height_droplet_right)
+	coalescene_data2[!, "drop_diff"] .= abs.(coalescene_data2.height_droplet_left .- coalescene_data2.height_droplet_right)
+	# Now just plot it
+	colors_h = [palette(:default)[5], palette(:default)[6], palette(:default)[7], palette(:default)[8],palette(:default)[9]]
+	hdiff = plot(@subset(coalescene_data, :g_x .== γ_names[1]).t_norm, #[log_t] 
+		@subset(coalescene_data2, :g_x .== γ_names[1]).drop_diff, 
+				label=label_dict[γ_names[1]],
+				# st = :scatter,
+				l = (3, :solid),
+				ylabel = "Δh", 
+				xlabel = "t/τ",
+				legend = :topleft,
+				# yaxis = :log,
+				grid = false,				
+		      	st = :samplemarkers, 				# some recipy stuff
+		        step = 1000, 						# density of markers
+		        marker = (:circle, 8, 0.6, Plots.stroke(0, :gray)),	
+				legendfontsize = 12,		# legend font size
+    			tickfontsize = 14,			# tick font and size
+    			guidefontsize = 15,
+				# ,
+				)
+	plot!(@subset(coalescene_data, :g_x .== γ_names[2]).t_norm, #[log_t] 
+			@subset(coalescene_data, :g_x .== γ_names[2]).drop_diff, 
+					label=label_dict[γ_names[2]],
+					l = (3, :dash),
+					st = :samplemarkers, 				# some recipy stuff
+		        	step = 1000,
+					marker = (marker_dict[1], 8, 0.6, Plots.stroke(0, :gray)),
+		)
+	for k in 5:7
+		plot!(@subset(coalescene_data, :g_x .== γ_names[k]).t_norm, #[log_t] 
+			@subset(coalescene_data, :g_x .== γ_names[k]).drop_diff, 
+					label=label_dict[γ_names[k]],
+					l = (3, :auto, colors_h[k-4]),
+					st = :samplemarkers, 				# some recipy stuff
+		        	step = 1000,
+					# st = :scatter,
+					marker = (marker_dict[k-1], colors_h[k-4], 8, 0.6, Plots.stroke(0, :gray)),
+		)
+	end
+	plot!(@subset(coalescene_data, :g_x .== γ_names[8]).t_norm, #[log_t] 
+			@subset(coalescene_data, :g_x .== γ_names[8]).drop_diff, 
+					label=label_dict[γ_names[8]],
+					l = (3, :auto, colors_h[4]),
+					st = :samplemarkers, 				# some recipy stuff
+		        	step = 1000,
+					marker = (:dt, colors_h[4], 8, 0.6, Plots.stroke(0, :gray)),
+					# ylims=(1e-3, 100)
+		)
+end
+
+# ╔═╡ 025cc277-1b89-47f2-a69b-6666d7c01959
+md"What this plot nicely shows is the flux from the low surface tension droplet towards the heigh surface tension one. 
+In fact most curves have two slops, one rather fast growing, for which the bridge height grows with $h_0 \sim t^{2/3}$ and a slow growing one.
+The later offers only limited transport through the precursor layer.
+The point where the slopes change is actually assoziated with the separation time.
+
+### Pressures
+
+One last thing that we are looking into is the distribution of the pressures.
+The pressure is something similar to 
+
+```math
+	p = \gamma(\Delta h - \Pi(h)),
+```
+therefore a second derivative of the height with an additional disjoining pressure component.
+One natural unit of pressure for the coalescence is
+
+```math
+	p_0 = \frac{\gamma}{R},
+```
+often called capillary pressure.
+
+In the following we take a look at a subset of simulations where we measured the pressures and compare the two pressure contributions.
+But first we load the data, which can be download with the repository. 
+"
+
+# ╔═╡ 6295e154-db19-4b27-bffa-4ced4a74eae3
+pressure_data = CSV.read("..\\data\\pressure_data.csv", DataFrame)
+
+# ╔═╡ c1286892-4a55-497d-b4fa-1f1dbe39f3be
+md"We use this data to take a deeper look at the coalescence.
+Often the disjoining pressure term is just disregared, because it only becomes important when things are small (like very small).
+
+In the plot below we compare the contribtuions.
+As soon as the droplets separate, the disjoining pressure is much larger than the capillary pressure.
+Not just a bit, but a considerably larger.
+Only for cases where the surface tension gradient is smeared out a lot, the capillary pressure is larger and the disjoining pressure is vanishing.
+"
+
+# ╔═╡ ccf73606-7b84-4a01-9734-2ed9fa1d7e32
+begin
+	xaxis = -171:2:171 
+	pressure_plot = plot()
+	# for i in [10000, 1000000, 100000000]
+	ci = [palette(:default)[1], palette(:default)[2], palette(:default)[3]] 
+	for i in enumerate(["step", "tanh5", "tanh100"])
+		plot!(xaxis ./171, 
+			pressure_data[(pressure_data.kind .== "lap") .& (pressure_data.time .== 100000000) .& (pressure_data.gamma .== i[2]), :pressure],
+			l=(3, :solid, ci[i[1]]),
+			label="$(label_dict[i[2]])",
+			xlabel="x/R₀",
+			ylabel="P/p₀",
+			st = :samplemarkers, 				# some recipy stuff
+			step = 11, 
+			marker = (:circle, 8, 0.6, Plots.stroke(0, :gray), ci[i[1]]),
+			legendfontsize = 12,		# legend font size
+	    	tickfontsize = 14,			# tick font and size
+	    	guidefontsize = 15,
+			legend=:bottomleft,
+			grid=false,
+		)
+		plot!(xaxis ./171, 
+			pressure_data[(pressure_data.kind .== "disj") .& (pressure_data.time .== 100000000) .& (pressure_data.gamma .== i[2]), :pressure],
+			l=(3, :dash, ci[i[1]]),
+			label="",
+			st = :samplemarkers, 				# some recipy stuff
+			step = 11, 
+			marker = (:star, 8, 0.6, Plots.stroke(0, :gray), ci[i[1]]),
+		)
+	end
+	# lens!([-0.15,0.85], [-1.5, 1.5], inset = (1, bbox(0.1, 0.2, 0.4, 0.4)))
+	plot!(xlims=(-0.85, 0.65))
+	lens!([-0.15,0.85], [-0.5, 0.5], grid=false, inset = (1, bbox(0.1, 0.2, 0.4, 0.4)))
+end
+
+# ╔═╡ f580fb04-725f-465d-82ad-ad680d12944a
+md" ## What did we learn?
+
+1. Droplets always coalesce - No
+2. Surface tension gradients offer an option to control coalescence
+3. At disjoining pressure scales droplets can separate
+4. This separation happens on time scales depending mostly on the surface tension gradient
+5. Will we find asymmetric coalesce in VOF - Maybe
+
+For everyone who read to this point, it is now for a refreshment!
+Here is a video to a non-alcoholic sommer coffee drink I enjoy quite a lot (although I use cheap tonic water).
+"
+
+# ╔═╡ 65716f84-c24a-423b-8801-d3d5a64f04e5
+html"""
+<div style="padding:1% 0 0 0;position:relative;"><iframe width="560" height="315" src="https://www.youtube.com/embed/4x92J4gQwzM" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+"""
+
+# ╔═╡ c8c95faa-cae6-4c27-88db-57e6c178bc50
+md"
+© Stefan Zitz 
+"
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -2461,6 +2628,14 @@ version = "0.9.1+5"
 # ╟─c03e49c3-f9f3-4e42-b1ac-ece4f425669a
 # ╟─aa55506e-2328-484e-a4c7-915f6a08b8b8
 # ╟─3ee0f7fd-8acb-41c6-b8c1-392cb1a08fb8
-# ╠═db2ca048-cb1f-4f0d-93db-6dd808cff6f1
+# ╟─db2ca048-cb1f-4f0d-93db-6dd808cff6f1
+# ╟─e5a289a4-c4d3-475c-a455-8fe72f1971a8
+# ╟─025cc277-1b89-47f2-a69b-6666d7c01959
+# ╠═6295e154-db19-4b27-bffa-4ced4a74eae3
+# ╟─c1286892-4a55-497d-b4fa-1f1dbe39f3be
+# ╟─ccf73606-7b84-4a01-9734-2ed9fa1d7e32
+# ╟─f580fb04-725f-465d-82ad-ad680d12944a
+# ╟─65716f84-c24a-423b-8801-d3d5a64f04e5
+# ╟─c8c95faa-cae6-4c27-88db-57e6c178bc50
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
