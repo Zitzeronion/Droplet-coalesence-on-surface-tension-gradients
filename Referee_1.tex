@@ -1,0 +1,168 @@
+\documentclass[12pt,english]{article}
+
+\usepackage{natbib}
+
+\usepackage{graphics,graphicx,dcolumn,bm,fleqn,epic,eepic,float}
+\usepackage{amssymb,amsmath,multirow,rotate,rotating,color}
+\usepackage[utf8]{inputenc}
+
+\usepackage[english]{babel}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{tikz}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+}
+%\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+\tikzset{fontscale/.style = {font=\relsize{#1}}}
+\usetikzlibrary{calc}
+\makeatother
+
+\newcommand{\figref}[1]{Fig.~\ref{fig:#1}}
+\newcommand{\eqnref}[1]{Eq.~(\ref{eq:#1})}
+\newcommand{\ts}{\textsuperscript}
+
+\definecolor{tuered}{RGB}{214,0,74}
+
+\newcommand{\todo}[1]{\textbf{\textcolor{tuered}{ TODO: #1}}}
+
+\newcommand{\vectornorm}[1]{\left|\left|#1\right|\right|}
+
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\newcommand{\uvec}[1]{\hat{\vec{#1}}}
+\newcommand{\tensor}[1]{\mathbf{#1}}
+
+\definecolor{pyblue}{HTML}{1F77B4}
+\definecolor{pyorange}{HTML}{FF7F0C}
+\definecolor{pygreen}{HTML}{2CA02C}
+\definecolor{pyred}{HTML}{D62728}
+
+\begin{document}
+
+% The referee PDF has been generated from r239 -- 'make referee' command.
+
+\section*{Reply to Referee one}
+
+We thank the Referee for his/her thorough reading of our manuscript and critical assessment in his/her report.
+We do understand that he/she is not satisfied with the quality we supplied in our initial submission.
+It is now clear to us that we did not present our assumptions and results properly which lead to confusion and misunderstandings.
+In fact the biggest misunderstanding is that we simulate two miscible liquids.
+This is not possible without a concentration field, but is left as future work.
+We only consider a surface tension gradient, which is astonishingly enough to recreate features of experiments with two miscible liquids.
+After a thorough review we hope that he/she finds the paper clear, consistent and free of errors.
+In what follows we provide detailed answers to all Referee's questions and we discuss all the changes made to the manuscript
+(which are typeset in red colour).
+
+\begin{itemize}
+
+
+\item[ \textbf{\underline{Comment 1.}}]
+{
+The model describes 2D rather than 3D drops, which probably doesn't lose very much. 
+Significantly, however, the surface tension profile $\gamma(x)$ is prescribed and held fixed, rather than being allowed to evolve due to the dynamics of surfactant and/or material transport by advection and possibly diffusion. 
+It seems to me that this loses a very important feature of the differing-drop coalescence problem. 
+For example, it loses the mechanism that causes the experimentally observed translation of the bridge.
+
+\item[ \textbf{Answer}]
+{
+
+}
+
+\item[ \textbf{\underline{Comment 2.}}]
+The imposed surface tension profile is either a step (Heaviside) function or a $\tanh$ profile of prescribed width between values $\gamma_0$ and $0.8\gamma_0$. 
+I am not surprised that, when the profile width is much larger than the width of the initial bridge, the initial behavior is like the uniform tension case. 
+Conversely, when the profile width is small, the fact that it is imposed at a fixed position means that there is a strong local Marangoni flux, which causes thinning on the side it is directed away from; hence the minimum height $h_0$ is directly driven down to of order the precursor height $h_*$ in a way that is not the same as would happen with evolving surface tension. 
+(It is also unclear whether the model is well-posed for the case of a Heaviside profile and a delta function Marangoni stress.)
+}
+
+\item[ \textbf{Answer}]
+{
+
+}
+
+\item[ \textbf{\underline{Comment 3.}}]
+{
+The paper is unclear and inconsistent about whether it is considering an inertial or a viscous regime. 
+The governing equation (5) is viscous lubrication theory with zero inertia. 
+The pressure scale (7) is Bernoulli which suggests negligible viscosity. 
+The pressure scale (9) mixes the (viscous) capillary velocity with (inertial) Bernoulli pressure. 
+The numerical method (16) has an ad hoc mixture of inertial and viscous terms (a sort of Galerkin approach), and one can only guess from the sketchy information in Appendix B that the Reynolds number of the simulations might be of order 6.
+}
+
+\item[ \textbf{{Answer}}]
+{
+
+\emph{Tilman: }
+    To the best of our understanding equation (16) is indeed covering both, the inertial and the viscous regime. It can be derived from incompressible Navier Stokes for fluid velocity $v=(v_x,v_z)(x,z)$ and constant density by vertical integration under the following assumptions
+    \begin{enumerate}
+        \item $\nabla^2 (v_x,v_z)\approx \partial_z^2 (v_x,v_z)$ that can be justified from the Lubrication/Long Wave approximation i.e. $\frac{H}{L}\ll 1$
+        \item The pressure reads $p=-\gamma \kappa -\Pi(h)$ with surface tension $\gamma$, curvature $\kappa$ which is approximated by $\kappa\approx \nabla^2 h$ \cite{thiele_thermodynamically_2012}\cite{peschka_signatures_2019} and disjoining pressure $\Pi(h)$ that comes from the free energy of wetting \cite{thiele_thermodynamically_2012}\cite{peschka_signatures_2019}. 
+        \item $\partial_z p \approx 0$ and $\partial_z F\approx 0$
+        \item We define $u=:\frac{1}{h}\int_0^h v_x dz$ and assume $\frac{1}{hu^2}\int v_x^2 dz\approx 1$.
+        \item As boundary conditions at $z=0$ and $z=h$ we assume $v$ to consist of two contributions. A parabolic flow with partial slip of length $\delta$ at the substrate coming from $\nabla p$ and a linear shear flow from $\nabla \gamma$. 
+    \end{enumerate}
+    We do not impose the Stokes approximation ($Re\ll 1$) onto equation (16). If one does impose $Re\ll 1$ then (16) becomes the thin film equation (5). Thus by varying the Reynolds number our method is able access both the inertial and viscous regime and therefore is in a way more precise then just solving equation (5). Equation (16) is often found in the context of thin liquid films e.g. in \cite{peschka_signatures_2019} or \cite{hack_self-similar_2020}.
+}
+
+\item[ \textbf{\underline{Comment 4.}}]
+{
+I do not believe the scaling argument in (24)-(26). 
+Equation (24) is an unexplained assumption about horizontal and vertical length scales. 
+If it were true then equation (25) implies that $h_0$ is approximately 10 times the horizontal lengthscale $w$ of the Marangoni forcing. 
+But this violates the assumptions of long thin flow that are used to derive (5). 
+Finally, (25) is combined with an assumed scaling (8) for the {\bf growth} of $h_0$ to deduce a scaling (26) for the time taken for $h_0$ to {\bf decrease} to $h_*$. 
+In addition to these internal inconsistencies, none of this addresses the fundamental mechanism, see 2., by which layer thinning is driven by the divergent Marangoni flux.
+}
+
+\item[ \textbf{{Answer}}]
+{
+
+}
+
+\item[ \textbf{\underline{Comment 5.}}]
+{
+I do not see why one should use lattice Boltzmann calculations for this problem (except that the authors have a code). 
+Chen et al. (Phys. Fluids 092005, 2021) show beautiful 3D finite-element simulations of the PDEs, including the proper physics of solvent transport and
+precursor films, which give excellent agreement with experiment. 
+The calculations here are very crude in comparison.
+}
+
+\item[ \textbf{{Answer}}]
+{
+\emph{Tilman: }
+
+First of the referee is a huge cunt.
+
+
+Second there are 3 advantages (appart from the fact that indeed we already have this code) of our numerical method. The LBM is numerically very stable and thus allows to run simulations with larger spacial and temporal steps making them computationally cheap. As far as we know finite-element codes for the TFE are computationally more expensive by several orders of magnitude. Also the Lattice Boltzmann method makes it simple to handle external Forces and local inhomogenieties as the surface tension gradient. Finally solving (16) (by whatever numerical integrator) does not restrict us to low Reynolds numbers.  
+
+}
+
+\item[ \textbf{\underline{Comment 6.}}]
+{
+Some technical points:
+
+(12) is not the integral of (11) -- it is the integral of a travelling
+wave solution to (5). The authors have not understood [23].
+
+(16) is missing a factor $1/\rho_0$ in the Marangoni term.
+
+The modulus signs in (19) are unnecessary and the expression
+simplifies considerably.
+}
+
+\item[ \textbf{{Answer}}]
+{
+
+}
+\end{itemize}
+
+
+\bibliographystyle{abbrv}
+\bibliography{Ref}
+
+\end{document}
